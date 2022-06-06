@@ -39,6 +39,11 @@ def run_benchmark(args, env):
 
     print('Running %s-cores%d'%(prefix, num_cores))
 
+    env.enable_prefetch()
+
+    if args.disable_prefetch:
+        env.disable_prefetch()
+
     ant = None
 
     if args.ant:
@@ -100,6 +105,7 @@ def main(argv=[]):
     parser.add_argument('--ant_writefrac', help='Antagonist write fraction (percentage)', type=int)
     parser.add_argument('--ant_duration', help='Antagonist run duration', type=int, default=40)
     parser.add_argument('--stats', help='Record stats', action='store_true')
+    parser.add_argument('--disable_prefetch', help='Disable prefetchers', action='store_true')
 
     args = parser.parse_args(argv[1:])
     x_ncores = expand_ranges(args.ant_num_cores)
