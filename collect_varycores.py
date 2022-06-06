@@ -141,7 +141,7 @@ def get_l2miss(config, num_cores):
         total_count += l2_hits[i]
         total_count += l2_misses[i]
 
-    return float(miss_count)/float(total_count)
+    return float(miss_count)/float(total_count+1)
 
 def get_l3miss(config, num_cores):
     l3_hits = {}
