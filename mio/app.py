@@ -5,7 +5,7 @@ from .pcm import *
 import os, time
 import argparse
 
-WARMUP_DURATION = 5
+WARMUP_DURATION = 10
 RECORD_DURATION = 5
 
 def expand_ranges(x):
