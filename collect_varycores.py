@@ -163,7 +163,7 @@ def get_l3miss(config, num_cores):
         total_count += l3_hits[i]
         total_count += l3_misses[i]
 
-    return float(miss_count)/float(total_count)
+    return float(miss_count)/float(total_count+1)
 
 def get_rpqocc(config):
     agg_occ = {}
