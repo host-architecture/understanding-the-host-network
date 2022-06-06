@@ -4,6 +4,7 @@ from .pcm import *
 
 import os, time
 import argparse
+import atexit
 
 WARMUP_DURATION = 10
 RECORD_DURATION = 5
@@ -75,10 +76,18 @@ def run_benchmark(args, env):
     if ant:
         ant.wait()
 
+def cleanup():
+    # TODO: Hacky
+    os.system('pkill -9 -f pcm')
+    os.system('pkill -9 -f mlc')
+    os.system('pkill -9 -f fio')
+
 
 def main(argv=[]):
     root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     config_path = os.path.join(root_dir, 'config.json')
+
+    atexit.register(cleanup)
 
     parser = argparse.ArgumentParser()
     parser.add_argument('config', help='Label for experiment')
