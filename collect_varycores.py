@@ -190,7 +190,7 @@ def get_rpqocc(config):
 
 prefix = sys.argv[1]
 core_range = sys.argv[2]
-x_ncores = expand_ranges(args.ant_num_cores)
+x_ncores = expand_ranges(core_range)
 
 for i in x_ncores:
     config = prefix + '-cores' + str(i)
