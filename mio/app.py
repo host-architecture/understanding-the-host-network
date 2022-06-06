@@ -17,6 +17,7 @@ def main(args=[]):
 
     mlc.run(10)
     pcm_mem.run(os.path.join(env.get_stats_path(), 'foo.pcm-memory.txt'), 5)
+    print('PCM complete')
     mlc.wait()
 
     print('Complete')
