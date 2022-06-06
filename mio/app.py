@@ -11,7 +11,7 @@ def main(args=[]):
     env = Environment(config_path)
 
     mlc = MLCRunner(env.get_mlc_path())
-    mlc.init(os.path.join(env.get_stats_path, 'foo.mlc.txt'), [0], 0, {})
+    mlc.init(os.path.join(env.get_stats_path(), 'foo.mlc.txt'), [0], 0, {})
 
     mlc.run(10)
     mlc.wait()
