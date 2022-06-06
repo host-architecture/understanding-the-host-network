@@ -2,7 +2,7 @@ from .env import *
 from .mlc import *
 from .pcm import *
 
-import os
+import os, time
 
 def main(args=[]):
     root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -15,7 +15,8 @@ def main(args=[]):
 
     pcm_mem = PcmMemoryRunner(env.get_pcm_path())
 
-    mlc.run(10)
+    mlc.run(20)
+    time.sleep(5)
     pcm_mem.run(os.path.join(env.get_stats_path(), 'foo.pcm-memory.txt'), 5)
     print('PCM complete')
     mlc.wait()
