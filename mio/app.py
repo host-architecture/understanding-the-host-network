@@ -69,7 +69,7 @@ def main(argv=[]):
     parser = argparse.ArgumentParser()
     parser.add_argument('config', help='Label for experiment')
     parser.add_argument('--ant', help='What antagonist to use (mlc/stream)')
-    parser.add_argument('--ant_num_cores', help='Number of cores to run antagonist on', type=int, default='1')
+    parser.add_argument('--ant_num_cores', help='Number of cores to run antagonist on', default='1')
     parser.add_argument('--ant_mem_numa', help='Number of cores to run antagonist on', type=int, default=0)
     parser.add_argument('--ant_numa_order', help='Order of NUMA nodes to use for antagonist', default='0,1,2,3')
     parser.add_argument('--ant_inst_size', help='Instruction size for antagonist', type=int)
@@ -78,7 +78,7 @@ def main(argv=[]):
     parser.add_argument('--ant_duration', help='Antagonist run duration', type=int, default=40)
     parser.add_argument('--stats', help='Record stats', action='store_true')
 
-    args = parser.parse_args(argv)
+    args = parser.parse_args(argv[1:])
     x_ncores = expand_ranges(args.ant_num_cores)
 
     env = Environment(config_path)
