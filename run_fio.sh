@@ -22,4 +22,4 @@ pids+=($!);
 
 wait "${pids[@]}"
 
-paste <(cat $STATS_PATH/$config.fio*.txt  | grep "iops        :" | awk '{print$5}' | tr -d 'avg=' | tr -d ',' | awk -v sz=$io_size '{s += $1} END {print s*sz*8/1e9;}') <(cat $STATS_PATH/$config.fio*.txt | grep "clat (" | awk '{print $5}' | tr -d 'avg=' | tr -d ',' | awk '{s+=$1} END {print s/NR;}') <(cat $STATS_PATH/$config.fio*.txt | grep "99.90th" | tr -d ' |' | tr ',' ' ' | awk '{print $3}' | tr '=' ' ' | awk '{print $2}' | tr -d '[]' | awk '{s+=$1} END {print s/NR;}')
+paste <(cat $STATS_PATH/$config.fio*.txt  | grep "iops        :" | awk '{print$5}' | tr -d 'avg=' | tr -d ',' | awk -v sz=$io_size '{s += $1} END {print s*sz*8/1e9;}') <(cat $STATS_PATH/$config.fio*.txt | grep "clat (usec)" | awk '{print $5}' | tr -d 'avg=' | tr -d ',' | awk '{s+=$1} END {print s/NR;}') <(cat $STATS_PATH/$config.fio*.txt | grep "99.90th" | tr -d ' |' | tr ',' ' ' | awk '{print $3}' | tr '=' ' ' | awk '{print $2}' | tr -d '[]' | awk '{s+=$1} END {print s/NR;}')
