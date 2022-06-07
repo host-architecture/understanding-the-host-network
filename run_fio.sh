@@ -21,3 +21,5 @@ numactl --membind 3 $FIO_PATH/fio --cpus_allowed=24,28 --filename=/dev/nvme5n1 -
 pids+=($!);
 
 wait "${pids[@]}"
+
+paste <(cat $STATS_PATH/$config.fio*.txt  | grep "iops        :" | awk '{print$5}' | tr -d 'avg=' | tr -d ',' | awk '{s += $1} END {print s;}') <(cat ~/membw-eval/test.fio*.txt | grep "clat (usec)" | awk '{print $5}' | tr -d 'avg=' | tr -d ',' | awk '{s+=$1} END {print s/NR;}') <(cat ~/membw-eval/test.fio*.txt | grep "99.90th" | awk '{print $7}' | tr -d '],' | awk '{s+=$1} END {print s/NR;}')
