@@ -31,6 +31,7 @@ def run_benchmark(args, env):
     prefix = args.config
     num_cores = args.ant_num_cores
     mem_numa = args.ant_mem_numa
+    mem_region = args.ant_mem_region
     numa_order = [int(x) for x in args.ant_numa_order.split(',')]
     ant_duration = args.ant_duration
 
@@ -57,7 +58,7 @@ def run_benchmark(args, env):
         else:
             raise Exception('Unknown antagonist')
 
-        ant.init(os.path.join(env.get_stats_path(), '%s-cores%d.mlc.txt'%(prefix, num_cores)), cores, mem_numa, {})
+        ant.init(os.path.join(env.get_stats_path(), '%s-cores%d.mlc.txt'%(prefix, num_cores)), cores, mem_numa, mem_region, {})
         if args.ant_inst_size:
             ant.set_instsize(args.ant_inst_size)
         if args.ant_pattern:
