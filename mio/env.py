@@ -10,6 +10,7 @@ class Environment:
         self.mlc_path = None
         self.pcm_path = None
         self.stats_path = None
+        self.fio_path = None
 
         if 'MLC_PATH' in config_dict:
             self.mlc_path = config_dict['MLC_PATH']
@@ -42,6 +43,11 @@ class Environment:
         if not self.stats_path:
             raise Exception('Stats Path not specified')
         return self.stats_path
+
+    def get_fio_path(self):
+        if not self.fio_path:
+            raise Exception('FIO Path not specified')
+        return self.mlc_path
 
     def enable_prefetch(self):
         if os.system('wrmsr -a 0x1a4 0') != 0:

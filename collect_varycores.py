@@ -60,9 +60,9 @@ def get_lfblat(config, num_cores):
             cols = line.split(',')
 
             for i in range(len(CORE_LIST)):
-                lfb_occ[i] = int(cols[3*i + 3])
-                l1_cycles[i] = int(cols[3*i + 4])
-                l1_misses[i] = int(cols[3*i + 5])
+                lfb_occ[i] = int(cols[4*i + 3])
+                l1_cycles[i] = int(cols[4*i + 4])
+                l1_misses[i] = int(cols[4*i + 5])
                 core_lats[i] = 1e9*(float(lfb_occ[i])/float(l1_cycles[i]))/(float(l1_misses[i]))
 
     sum_lat = 0.0
@@ -71,6 +71,52 @@ def get_lfblat(config, num_cores):
         sum_lat += core_lats[core_idx]
 
     return sum_lat/float(num_cores)
+
+def get_lfbocc(config, num_cores):
+    lfb_occ = {}
+    l1_cycles = {}
+    l1_misses = {}
+    core_occ = {}
+    with open(os.path.join(STATS_PATH, config + '.pcm-lfb.txt'), 'r') as f:
+        for line in f:
+            if not re.search('\d\d\d\d-\d\d-\d\d,', line):
+                continue
+            cols = line.split(',')
+
+            for i in range(len(CORE_LIST)):
+                lfb_occ[i] = int(cols[4*i + 3])
+                l1_cycles[i] = int(cols[4*i + 4])
+                l1_misses[i] = int(cols[4*i + 5])
+                core_occ[i] = (float(lfb_occ[i])/float(l1_cycles[i]))
+
+    sum_occ = 0.0
+    for i in range(min(num_cores, 8)):
+        core_idx = CORE_LIST[i]
+        sum_occ += core_occ[core_idx]
+
+    return sum_occ/float(num_cores)
+
+def get_lfbfull(config, num_cores):
+    l1_cycles = {}
+    lfb_full = {}
+    core_lfb_full = {}
+    with open(os.path.join(STATS_PATH, config + '.pcm-lfb.txt'), 'r') as f:
+        for line in f:
+            if not re.search('\d\d\d\d-\d\d-\d\d,', line):
+                continue
+            cols = line.split(',')
+
+            for i in range(len(CORE_LIST)):
+                l1_cycles[i] = int(cols[4*i + 4])
+                lfb_full[i] = int(cols[4*i + 6])
+                core_lfb_full[i] = (float(lfb_full[i])/float(l1_cycles[i]))
+
+    sum_lfb_full = 0.0
+    for i in range(min(num_cores, 8)):
+        core_idx = CORE_LIST[i]
+        sum_lfb_full += core_lfb_full[core_idx]
+
+    return sum_lfb_full/float(num_cores)
 
 def get_l1miss(config, num_cores):
     all_loads = {}
@@ -194,5 +240,5 @@ x_ncores = expand_ranges(core_range)
 
 for i in x_ncores:
     config = prefix + '-cores' + str(i)
-    row = '%d %f %f %f %f %f %f %d' % (i, get_xput(config), get_lfblat(config, i), get_l1miss(config, i), get_l2miss(config, i), get_l3miss(config, i), get_rpqocc(config), get_allloads(config, i))
+    row = '%d %f %f %f %f %f %f %f %f %d' % (i, get_xput(config), get_lfblat(config, i), get_lfbocc(config, i), get_lfbfull(config, i), get_l1miss(config, i), get_l2miss(config, i), get_l3miss(config, i), get_rpqocc(config), get_allloads(config, i))
     print(row)

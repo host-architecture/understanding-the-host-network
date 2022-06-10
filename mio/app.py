@@ -1,6 +1,7 @@
 from .env import *
 from .mlc import *
 from .pcm import *
+from .fio import *
 
 import os, time
 import argparse
@@ -10,7 +11,7 @@ WARMUP_DURATION = 10
 RECORD_DURATION = 5
 RECORD_GROUPS = 5
 
-events_group_0 = {'lfb_occ': 'core/config=0x0000000000430148', 'lfb_cycles': 'core/config=0x0000000001430148', 'load_l1_misses': 'core/config=0x00000000004308d1'}
+events_group_0 = {'lfb_occ': 'core/config=0x0000000000430148', 'lfb_cycles': 'core/config=0x0000000001430148', 'load_l1_misses': 'core/config=0x00000000004308d1', 'lfb_full': 'core/config=0x0000000000430248'}
 events_group_1 = {'load_l1_hits': 'core/config=0x00000000004301d1', 'load_l1_misses': 'core/config=0x00000000004308d1', 'load_l1_fbhit': 'core/config=0x00000000004340d1', 'loads': 'core/config=0x00000000004381d0'}
 events_group_2 = {'load_l2_hits': 'core/config=0x00000000004302d1', 'load_l2_misses': 'core/config=0x00000000004310d1', 'load_l3_hits': 'core/config=0x00000000004304d1', 'load_l3_misses': 'core/config=0x00000000004320d1'}
 events_group_3 = {'rpq_occupancy': 'imc/config=0x0000000000400080', 'rpq_ne_cycles': 'imc/config=0x0000000000400011', 'cas_count': 'imc/config=0x000000000040f04'}
@@ -67,6 +68,11 @@ def run_benchmark(args, env):
 
         ant.run(ant_duration)
 
+    if args.fio:
+        fio = FIORunner(env.get_fio_path())
+
+        fio.init(os.path.join(env.get_stats_path(), '%s-cores%d.fio.txt'%(prefix, num_cores)))
+
     if args.stats:    
         pcm_mem = PcmMemoryRunner(env.get_pcm_path())
         time.sleep(WARMUP_DURATION)
@@ -106,6 +112,13 @@ def main(argv=[]):
     parser.add_argument('--ant_duration', help='Antagonist run duration', type=int, default=40)
     parser.add_argument('--stats', help='Record stats', action='store_true')
     parser.add_argument('--disable_prefetch', help='Disable prefetchers', action='store_true')
+    parser.add_argument('--fio', help='Run fio', action='store_true')
+    parser.add_argument('--fio_mem_numa', help='what it says', type=int, default=0)
+    parser.add_argument('--fio_cpu_numa', help='what it says', type=int, default=0)
+    parser.add_argument('--fio_writefrac', help='what it says', type=int, default=0)
+    parser.add_argument('--fio_iosize', help='what it says', type=int, default=4096)
+    parser.add_argument('--fio_iodepth', help='what it says', type=int, default=1)
+
 
     args = parser.parse_args(argv[1:])
     x_ncores = expand_ranges(args.ant_num_cores)
