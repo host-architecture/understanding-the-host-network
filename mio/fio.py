@@ -1,6 +1,5 @@
 import subprocess, os
 
-from nbformat import write
 
 class FIORunner:
     def __init__(self, path):
