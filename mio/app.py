@@ -106,6 +106,7 @@ def main(argv=[]):
     parser.add_argument('--ant_pattern', help='Antagonist access pattern')
     parser.add_argument('--ant_writefrac', help='Antagonist write fraction (percentage)', type=int)
     parser.add_argument('--ant_duration', help='Antagonist run duration', type=int, default=40)
+    parser.add_argument('--ant_mem_region', help='Antagonist memory region size', default='1g')
     parser.add_argument('--stats', help='Record stats', action='store_true')
     parser.add_argument('--disable_prefetch', help='Disable prefetchers', action='store_true')
 
