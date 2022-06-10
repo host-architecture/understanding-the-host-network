@@ -6,10 +6,11 @@ class MLCRunner(Antagonist):
     def __init__(self, path):
         self.mlc_path = os.path.join(path, 'mlc')
 
-    def init(self, output_path, cores, mem_numa, opts):
+    def init(self, output_path, cores, mem_numa, mem_region, opts):
         self.output_path = output_path
         self.cores = cores
         self.mem_numa = mem_numa
+        self.mem_region = mem_region
         self.opts = opts
 
         # Default parameters
@@ -24,7 +25,7 @@ class MLCRunner(Antagonist):
         out_f = open(self.output_path, 'w')
         # $MLC_PATH/mlc --loaded_latency -T -d0 -e -k$cores_str -j0 -b1g -t$duration $workload $avx512flag
         cores_str = ','.join([str(x) for x in self.cores])
-        args = [self.mlc_path, '--loaded_latency', '-T', '-d0', '-e', '-k' + cores_str, '-j' + str(self.mem_numa), '-b1g', '-t' + str(duration)]
+        args = [self.mlc_path, '--loaded_latency', '-T', '-d0', '-e', '-k' + cores_str, '-j' + str(self.mem_numa), '-b' + self.mem_region , '-t' + str(duration)]
         
         if self.write_frac == 0:
             args.append('-R')
