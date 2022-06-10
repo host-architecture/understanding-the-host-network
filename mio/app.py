@@ -45,6 +45,9 @@ def run_benchmark(args, env):
     if args.disable_prefetch:
         env.disable_prefetch()
 
+    if args.disable_prefetch_l1:
+        env.disable_prefetch_l1()
+
     ant = None
 
     if args.ant:
@@ -112,6 +115,7 @@ def main(argv=[]):
     parser.add_argument('--ant_duration', help='Antagonist run duration', type=int, default=40)
     parser.add_argument('--stats', help='Record stats', action='store_true')
     parser.add_argument('--disable_prefetch', help='Disable prefetchers', action='store_true')
+    parser.add_argument('--disable_prefetch_l1', help='Disable L1 prefetchers', action='store_true')
     parser.add_argument('--fio', help='Run fio', action='store_true')
     parser.add_argument('--fio_mem_numa', help='what it says', type=int, default=0)
     parser.add_argument('--fio_cpu_numa', help='what it says', type=int, default=0)

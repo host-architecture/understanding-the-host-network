@@ -56,6 +56,10 @@ class Environment:
     def disable_prefetch(self):
         if os.system('wrmsr -a 0x1a4 15') != 0:
             raise Exception('Disable prefetch failed')
+    
+    def disable_prefetch_l1(self):
+        if os.system('wrmsr -a 0x1a4 12') != 0:
+            raise Exception('Disable L1 prefetch failed')
 
     def enable_hugepages(self):
         for i in range(self.get_num_numa()):
