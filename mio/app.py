@@ -60,6 +60,9 @@ def run_benchmark(args, env):
         cores = []
         for numa_idx in numa_order:
             cores += env.get_cores_in_numa(numa_idx)
+        if args.fio:
+            fio_core_list = [int(y) for y in args.fio_cpus.split(',')]
+            cores = [x for x in cores if x not in fio_core_list]
         cores = cores[:num_cores]
 
         if args.ant == 'mlc':
