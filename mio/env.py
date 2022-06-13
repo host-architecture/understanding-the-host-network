@@ -22,7 +22,7 @@ class Environment:
             self.stats_path = config_dict['STATS_PATH']
 
         if 'FIO_PATH' in config_dict:
-            self.stats_path = config_dict['FIO_PATH']
+            self.fio_path = config_dict['FIO_PATH']
 
         # Get cpu topology
         # TODO: Make this generic
