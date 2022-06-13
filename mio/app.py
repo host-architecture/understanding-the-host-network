@@ -81,7 +81,7 @@ def run_benchmark(args, env):
         for i in range(args.fio_num_ssds):
             fio = FIORunner(env.get_fio_path())
             fio.init(os.path.join(env.get_stats_path(), '%s-cores%d.fio%d.txt'%(prefix, num_cores, i)), args.fio_cpus, args.fio_mem_numa, args.fio_iosize, args.fio_iodepth, args.fio_writefrac, SSD[i])
-            fio.run()
+            fio.run(args.fio_duration)
             fios.append(fio)
 
     if args.stats:    
