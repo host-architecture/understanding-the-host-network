@@ -137,10 +137,11 @@ def get_l1miss(config, num_cores):
 
     miss_count = 0
     total_count = 0
-    for i in range(num_cores):
-        miss_count += l1_misses[i]
-        miss_count += l1_fbhits[i]
-        total_count += all_loads[i]
+    for i in range(min(num_cores, 8)):
+        core_idx = CORE_LIST[i]
+        miss_count += l1_misses[core_idx]
+        miss_count += l1_fbhits[core_idx]
+        total_count += all_loads[core_idx]
 
     return float(miss_count)/float(total_count)
 
@@ -162,8 +163,9 @@ def get_allloads(config, num_cores):
                 all_loads[i] = int(cols[4*i + 6])
 
     res = 0
-    for i in range(num_cores):
-        res += all_loads[i]
+    for i in range(min(num_cores, 8)):
+        core_idx = CORE_LIST[i]
+        res += all_loads[core_idx]
 
     return res
 
@@ -182,10 +184,11 @@ def get_l2miss(config, num_cores):
 
     miss_count = 0
     total_count = 0
-    for i in range(num_cores):
-        miss_count += l2_misses[i]
-        total_count += l2_hits[i]
-        total_count += l2_misses[i]
+    for i in range(min(num_cores, 8)):
+        core_idx = CORE_LIST[i]
+        miss_count += l2_misses[core_idx]
+        total_count += l2_hits[core_idx]
+        total_count += l2_misses[core_idx]
 
     return float(miss_count)/float(total_count+1)
 
@@ -204,14 +207,16 @@ def get_l3miss(config, num_cores):
 
     miss_count = 0
     total_count = 0
-    for i in range(num_cores):
-        miss_count += l3_misses[i]
-        total_count += l3_hits[i]
-        total_count += l3_misses[i]
+    for i in range(min(num_cores, 8)):
+        core_idx = CORE_LIST[i]
+        miss_count += l3_misses[core_idx]
+        total_count += l3_hits[core_idx]
+        total_count += l3_misses[core_idx]
 
     return float(miss_count)/float(total_count+1)
 
 def get_rpqocc(config):
+    numa_node = 3
     agg_occ = {}
     cycles = {}
     with open(os.path.join(STATS_PATH, config + '.pcm-imc.txt'), 'r') as f:
@@ -220,12 +225,12 @@ def get_rpqocc(config):
                 continue
             cols = line.split(',')
 
-            for i in range(NUM_CHANNELS):
+            for i in range(numa_node * NUM_CHANNELS, (numa_node+1)*NUM_CHANNELS):
                 agg_occ[i] = int(cols[3*i + 3])
                 cycles[i] = int(cols[3*i + 4])
 
     sum_occ = 0.0
-    for i in range(NUM_CHANNELS):
+    for i in range(numa_node * NUM_CHANNELS, (numa_node+1)*NUM_CHANNELS):
         sum_occ += float(agg_occ[i])/float(cycles[i])
 
     
