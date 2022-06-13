@@ -274,5 +274,5 @@ x_ncores = expand_ranges(core_range)
 
 for i in x_ncores:
     config = prefix + '-ssds' + str(i) + '-cores1'
-    row = '%d %s %f %f' % (i, get_fioxput(config), get_memreadbw(config), get_memwritebw(config))
+    row = '%d %s %f %f' % (i, get_fioxput(config, io_size), get_memreadbw(config), get_memwritebw(config))
     print(row)
