@@ -1,7 +1,7 @@
-import os, sys, re
+import os, sys, re, subprocess
 
 STATS_PATH = '/home/midhul/membw-eval'
-CORE_LIST=[0,4,8,12,16,20,24,28,1,5,9,13,17,21,25,29,2,6,10,14,18,22,26,30,3,7,11,15,19,23,27,31]
+CORE_LIST=[3,7,11,15,19,23,27,31,0,4,8,12,16,20,24,28,1,5,9,13,17,21,25,29,2,6,10,14,18,22,26,30]
 NUM_CHANNELS=6
 
 def expand_ranges(x):
@@ -231,14 +231,48 @@ def get_rpqocc(config):
     
     return sum_occ/float(NUM_CHANNELS)
 
+def get_memreadbw(config):
+    samples = []
+    with open(os.path.join(STATS_PATH, config + '.pcm-memory.txt'), 'r') as f:
+        for line in f:
+            if not re.search('\d\d\d\d-\d\d-\d\d,', line):
+                continue
+            cols = line.split(',')
+            
+            samples.append(float(cols[-3].strip()))
+        
+    return sum(samples) / float(len(samples))
+
+def get_memwritebw(config):
+    samples = []
+    with open(os.path.join(STATS_PATH, config + '.pcm-memory.txt'), 'r') as f:
+        for line in f:
+            if not re.search('\d\d\d\d-\d\d-\d\d,', line):
+                continue
+            cols = line.split(',')
+            
+            samples.append(float(cols[-2].strip()))
+        
+    return sum(samples) / float(len(samples))
+
+def get_fioxput(config, io_size):
+    return subprocess.check_output(['./collect_fio.sh', config, str(io_size)])
+
+
 
 
 
 prefix = sys.argv[1]
 core_range = sys.argv[2]
+io_size = 8*1024*1024
 x_ncores = expand_ranges(core_range)
 
+# for i in x_ncores:
+#     config = prefix + '-cores' + str(i)
+#     row = '%d %f %f %f %f %f %f %f %f %d' % (i, get_xput(config), get_lfblat(config, i), get_lfbocc(config, i), get_lfbfull(config, i), get_l1miss(config, i), get_l2miss(config, i), get_l3miss(config, i), get_rpqocc(config), get_allloads(config, i))
+#     print(row)
+
 for i in x_ncores:
-    config = prefix + '-cores' + str(i)
-    row = '%d %f %f %f %f %f %f %f %f %d' % (i, get_xput(config), get_lfblat(config, i), get_lfbocc(config, i), get_lfbfull(config, i), get_l1miss(config, i), get_l2miss(config, i), get_l3miss(config, i), get_rpqocc(config), get_allloads(config, i))
+    config = prefix + '-ssds' + str(i) + '-cores1'
+    row = '%d %s %f %f' % (i, get_fioxput(config), get_memreadbw(config), get_memwritebw(config))
     print(row)
