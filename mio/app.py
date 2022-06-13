@@ -39,7 +39,10 @@ def run_benchmark(args, env):
     ant_duration = args.ant_duration
 
     if args.ant and args.stats and ant_duration <= WARMUP_DURATION + RECORD_DURATION*RECORD_GROUPS:
-        raise Exception('Duration too small for measuring all stats')
+        raise Exception('Antagonist Duration too small for measuring all stats')
+
+    if args.fio and args.stats_membw and args.fio_duration < WARMUP_DURATION + RECORD_DURATION:
+        raise Exception('FIO Duration too small for measuring stats')
 
     print('Running %s-cores%d'%(prefix, num_cores))
 
@@ -93,6 +96,11 @@ def run_benchmark(args, env):
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l1.txt'%(prefix, num_cores)), events_group_1, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l2l3.txt'%(prefix, num_cores)), events_group_2, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-imc.txt'%(prefix, num_cores)), events_group_3, RECORD_DURATION)
+    elif args.stats_membw:
+        pcm_mem = PcmMemoryRunner(env.get_pcm_path())
+        time.sleep(WARMUP_DURATION)
+        pcm_mem.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-memory.txt'%(prefix, num_cores)), RECORD_DURATION)
+
 
     if args.fio:
         for fio in fios:
@@ -125,6 +133,7 @@ def main(argv=[]):
     parser.add_argument('--ant_writefrac', help='Antagonist write fraction (percentage)', type=int)
     parser.add_argument('--ant_duration', help='Antagonist run duration', type=int, default=40)
     parser.add_argument('--stats', help='Record stats', action='store_true')
+    parser.add_argument('--stats_membw', help='Record membw stats', action='store_true')
     parser.add_argument('--disable_prefetch', help='Disable prefetchers', action='store_true')
     parser.add_argument('--disable_prefetch_l1', help='Disable L1 prefetchers', action='store_true')
     parser.add_argument('--fio', help='Run fio', action='store_true')
