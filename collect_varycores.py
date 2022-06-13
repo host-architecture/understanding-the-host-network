@@ -256,7 +256,7 @@ def get_memwritebw(config):
     return sum(samples) / float(len(samples))
 
 def get_fioxput(config, io_size):
-    return subprocess.check_output(['./collect_fio.sh', config, str(io_size)])
+    return float(subprocess.check_output(['./collect_fio.sh', config, str(io_size)]))
 
 
 
@@ -274,5 +274,5 @@ x_ncores = expand_ranges(core_range)
 
 for i in x_ncores:
     config = prefix + '-ssds' + str(i) + '-cores1'
-    row = '%d %s %f %f' % (i, get_fioxput(config, io_size), get_memreadbw(config), get_memwritebw(config))
+    row = '%d %f %f %f' % (i, get_fioxput(config, io_size), get_memreadbw(config), get_memwritebw(config))
     print(row)
