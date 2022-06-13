@@ -22,7 +22,7 @@ class FIORunner:
         out_f = open(self.output_path, 'w')
         # numactl --membind 3 ./fio --filename=/dev/nvme0n1 --name=test  --ioengine=libaio  --direct=1  --rw=randread  --gtod_reduce=0  --cpus_allowed_policy=split  --time_based  --size=1G  --runtime=10  --cpus_allowed=3,7  --numjobs=2  --bs=$((4*1024))  --iodepth=64 --group_reporting
         cores_str = ','.join([str(x) for x in self.cores])
-        args = ['numactl', '--membind', str(self.mem_numa), self.fio_path, '--name=test', '--ioengine=libaio', '--direct=1', '--gtod_reduce=0', '--cpus_allowed_policy=split', '--time_based', '--size=1G', '--runtime=%d'%(duration), '--cpus_allowed=%s'%(cores_str), '--numjobs=2', '--group_reporting']
+        args = ['numactl', '--membind', str(self.mem_numa), self.fio_path, '--name=test', '--ioengine=libaio', '--direct=1', '--gtod_reduce=0', '--cpus_allowed_policy=split', '--time_based', '--size=1G', '--runtime=%d'%(duration), '--cpus_allowed=%s'%(cores_str), '--numjobs=1', '--group_reporting', '--scramble_buffers=0']
         args.append('--filename=%s'%(self.disk))
         args.append('--bs=%d'%(self.io_size))
         args.append('--iodepth=%d'%(self.io_depth))

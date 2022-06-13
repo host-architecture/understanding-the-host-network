@@ -21,9 +21,12 @@ class Environment:
         if 'STATS_PATH' in config_dict:
             self.stats_path = config_dict['STATS_PATH']
 
+        if 'FIO_PATH' in config_dict:
+            self.stats_path = config_dict['FIO_PATH']
+
         # Get cpu topology
         # TODO: Make this generic
-        self.numa_cores = [[0,4,8,12,16,20,24,28], [1,5,9,13,17,21,25,29], [2,6,10,14,18,22,26,30], [3,7,11,15,19,23,27,31]]
+        self.numa_cores = [[3,7,11,15,19,23,27,31], [0,4,8,12,16,20,24,28], [1,5,9,13,17,21,25,29], [2,6,10,14,18,22,26,30]]
 
         if os.system('modprobe msr') != 0:
             raise Exception('Failed to load msr kernel module')
@@ -47,7 +50,7 @@ class Environment:
     def get_fio_path(self):
         if not self.fio_path:
             raise Exception('FIO Path not specified')
-        return self.mlc_path
+        return self.fio_path
 
     def enable_prefetch(self):
         if os.system('wrmsr -a 0x1a4 0') != 0:
