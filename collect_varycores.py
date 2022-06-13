@@ -217,6 +217,7 @@ def get_l3miss(config, num_cores):
 
 def get_rpqocc(config):
     numa_node = 3
+    channel_whitelist = [1,4]
     agg_occ = {}
     cycles = {}
     with open(os.path.join(STATS_PATH, config + '.pcm-imc.txt'), 'r') as f:
@@ -226,11 +227,18 @@ def get_rpqocc(config):
             cols = line.split(',')
 
             for i in range(numa_node * NUM_CHANNELS, (numa_node+1)*NUM_CHANNELS):
+                channel_idx = (i - numa_node * NUM_CHANNELS + 1)
+                if not channel_idx in channel_whitelist:
+                    continue
+
                 agg_occ[i] = int(cols[3*i + 3])
                 cycles[i] = int(cols[3*i + 4])
 
     sum_occ = 0.0
     for i in range(numa_node * NUM_CHANNELS, (numa_node+1)*NUM_CHANNELS):
+        channel_idx = (i - numa_node * NUM_CHANNELS + 1)
+        if not channel_idx in channel_whitelist:
+            continue
         sum_occ += float(agg_occ[i])/float(cycles[i])
 
     
