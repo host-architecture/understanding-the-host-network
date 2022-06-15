@@ -46,6 +46,7 @@
 # include <float.h>
 # include <limits.h>
 # include <sys/time.h>
+#include <immintrin.h>
 
 /*-----------------------------------------------------------------------
  * INSTRUCTIONS:
@@ -176,9 +177,9 @@
 #define STREAM_TYPE double
 #endif
 
-static STREAM_TYPE	a[STREAM_ARRAY_SIZE+OFFSET],
-			b[STREAM_ARRAY_SIZE+OFFSET],
-			c[STREAM_ARRAY_SIZE+OFFSET];
+static STREAM_TYPE	a[STREAM_ARRAY_SIZE+OFFSET] __attribute__((aligned(16))),
+			b[STREAM_ARRAY_SIZE+OFFSET] __attribute__((aligned(16))),
+			c[STREAM_ARRAY_SIZE+OFFSET] __attribute__((aligned(16)));
 
 static double	avgtime[4] = {0}, maxtime[4] = {0},
 		mintime[4] = {FLT_MAX,FLT_MAX,FLT_MAX,FLT_MAX};
@@ -306,8 +307,8 @@ main()
 	long long int sum = 0;
 	for(k=0; k<NTIMES; k++)
 	{
-		for (j=0; j<STREAM_ARRAY_SIZE; j++) {
-			sum = sum ^ (long long int)(a[j]);
+		for (j=0; j<STREAM_ARRAY_SIZE; j += 2) {
+			__m128d mm_a = _mm_load_pd(&a[j]);
 		}	    
 	}
 
