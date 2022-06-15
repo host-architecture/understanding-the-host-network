@@ -306,6 +306,8 @@ main()
 
 	__m128i sum;
 	_mm_set_pd(0, 0);
+	__m128i val;
+	_mm_set_epi32(1995, 1995, 2002, 2002);
 	for(k=0; k<NTIMES; k++)
 	{
 		for (j=0; j<STREAM_ARRAY_SIZE; j += 2) {
@@ -314,8 +316,8 @@ main()
 		}	    
 	}
 
-	if(_mm_test_all_ones(sum)) {
-		printf("rare event happened\n");
+	if(_mm_test_all_ones(_mm_cmpeq_epi8(sum,val))) {
+		printf("The impossible has happened\n");
 	}
 
 //     scalar = 3.0;
