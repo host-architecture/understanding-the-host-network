@@ -304,15 +304,17 @@ main()
     
     /*	--- MAIN LOOP --- repeat test cases NTIMES times --- */
 
-	long long int sum = 0;
+	__m128d sum;
+	_mm_set_pd(0, 0);
 	for(k=0; k<NTIMES; k++)
 	{
 		for (j=0; j<STREAM_ARRAY_SIZE; j += 2) {
 			__m128d mm_a = _mm_load_pd(&a[j]);
+			sum += mm_a;
 		}	    
 	}
 
-	if(sum == 1995) {
+	if(_mm_test_all_ones(sum)) {
 		printf("rare event happened\n");
 	}
 
