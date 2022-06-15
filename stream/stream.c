@@ -303,77 +303,89 @@ main()
     
     /*	--- MAIN LOOP --- repeat test cases NTIMES times --- */
 
-    scalar = 3.0;
-    for (k=0; k<NTIMES; k++)
+	double sum = 0;
+	for(k=0; k<NTIMES; k++)
 	{
-	times[0][k] = mysecond();
-#ifdef TUNED
-        tuned_STREAM_Copy();
-#else
-#pragma omp parallel for
-	for (j=0; j<STREAM_ARRAY_SIZE; j++)
-	    c[j] = a[j];
-#endif
-	times[0][k] = mysecond() - times[0][k];
-	
-	times[1][k] = mysecond();
-#ifdef TUNED
-        tuned_STREAM_Scale(scalar);
-#else
-#pragma omp parallel for
-	for (j=0; j<STREAM_ARRAY_SIZE; j++)
-	    b[j] = scalar*c[j];
-#endif
-	times[1][k] = mysecond() - times[1][k];
-	
-	times[2][k] = mysecond();
-#ifdef TUNED
-        tuned_STREAM_Add();
-#else
-#pragma omp parallel for
-	for (j=0; j<STREAM_ARRAY_SIZE; j++)
-	    c[j] = a[j]+b[j];
-#endif
-	times[2][k] = mysecond() - times[2][k];
-	
-	times[3][k] = mysecond();
-#ifdef TUNED
-        tuned_STREAM_Triad(scalar);
-#else
-#pragma omp parallel for
-	for (j=0; j<STREAM_ARRAY_SIZE; j++)
-	    a[j] = b[j]+scalar*c[j];
-#endif
-	times[3][k] = mysecond() - times[3][k];
+		for (j=0; j<STREAM_ARRAY_SIZE; j++) {
+			sum += a[j];
+		}	    
 	}
 
-    /*	--- SUMMARY --- */
-
-    for (k=1; k<NTIMES; k++) /* note -- skip first iteration */
-	{
-	for (j=0; j<4; j++)
-	    {
-	    avgtime[j] = avgtime[j] + times[j][k];
-	    mintime[j] = MIN(mintime[j], times[j][k]);
-	    maxtime[j] = MAX(maxtime[j], times[j][k]);
-	    }
+	if(sum == 1995) {
+		printf("rare event happened\n");
 	}
+
+//     scalar = 3.0;
+//     for (k=0; k<NTIMES; k++)
+// 	{
+// 	times[0][k] = mysecond();
+// #ifdef TUNED
+//         tuned_STREAM_Copy();
+// #else
+// #pragma omp parallel for
+// 	for (j=0; j<STREAM_ARRAY_SIZE; j++)
+// 	    c[j] = a[j];
+// #endif
+// 	times[0][k] = mysecond() - times[0][k];
+	
+// 	times[1][k] = mysecond();
+// #ifdef TUNED
+//         tuned_STREAM_Scale(scalar);
+// #else
+// #pragma omp parallel for
+// 	for (j=0; j<STREAM_ARRAY_SIZE; j++)
+// 	    b[j] = scalar*c[j];
+// #endif
+// 	times[1][k] = mysecond() - times[1][k];
+	
+// 	times[2][k] = mysecond();
+// #ifdef TUNED
+//         tuned_STREAM_Add();
+// #else
+// #pragma omp parallel for
+// 	for (j=0; j<STREAM_ARRAY_SIZE; j++)
+// 	    c[j] = a[j]+b[j];
+// #endif
+// 	times[2][k] = mysecond() - times[2][k];
+	
+// 	times[3][k] = mysecond();
+// #ifdef TUNED
+//         tuned_STREAM_Triad(scalar);
+// #else
+// #pragma omp parallel for
+// 	for (j=0; j<STREAM_ARRAY_SIZE; j++)
+// 	    a[j] = b[j]+scalar*c[j];
+// #endif
+// 	times[3][k] = mysecond() - times[3][k];
+// 	}
+
+//     /*	--- SUMMARY --- */
+
+//     for (k=1; k<NTIMES; k++) /* note -- skip first iteration */
+// 	{
+// 	for (j=0; j<4; j++)
+// 	    {
+// 	    avgtime[j] = avgtime[j] + times[j][k];
+// 	    mintime[j] = MIN(mintime[j], times[j][k]);
+// 	    maxtime[j] = MAX(maxtime[j], times[j][k]);
+// 	    }
+// 	}
     
-    printf("Function    Best Rate MB/s  Avg time     Min time     Max time\n");
-    for (j=0; j<4; j++) {
-		avgtime[j] = avgtime[j]/(double)(NTIMES-1);
+//     printf("Function    Best Rate MB/s  Avg time     Min time     Max time\n");
+//     for (j=0; j<4; j++) {
+// 		avgtime[j] = avgtime[j]/(double)(NTIMES-1);
 
-		printf("%s%12.1f  %11.6f  %11.6f  %11.6f\n", label[j],
-	       1.0E-06 * bytes[j]/mintime[j],
-	       avgtime[j],
-	       mintime[j],
-	       maxtime[j]);
-    }
-    printf(HLINE);
+// 		printf("%s%12.1f  %11.6f  %11.6f  %11.6f\n", label[j],
+// 	       1.0E-06 * bytes[j]/mintime[j],
+// 	       avgtime[j],
+// 	       mintime[j],
+// 	       maxtime[j]);
+//     }
+//     printf(HLINE);
 
-    /* --- Check Results --- */
-    checkSTREAMresults();
-    printf(HLINE);
+//     /* --- Check Results --- */
+//     checkSTREAMresults();
+//     printf(HLINE);
 
     return 0;
 }
