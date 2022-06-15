@@ -307,7 +307,7 @@ main()
 	for(k=0; k<NTIMES; k++)
 	{
 		for (j=0; j<STREAM_ARRAY_SIZE; j++) {
-			c[j] = a[j];
+			sum += a[j];
 		}	    
 	}
 
