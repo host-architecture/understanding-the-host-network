@@ -304,12 +304,12 @@ main()
     
     /*	--- MAIN LOOP --- repeat test cases NTIMES times --- */
 
-	__m128d sum;
+	__m128i sum;
 	_mm_set_pd(0, 0);
 	for(k=0; k<NTIMES; k++)
 	{
 		for (j=0; j<STREAM_ARRAY_SIZE; j += 2) {
-			__m128d mm_a = _mm_load_pd(&a[j]);
+			__m128i mm_a = _mm_load_si128(&a[j]);
 			sum += mm_a;
 		}	    
 	}
