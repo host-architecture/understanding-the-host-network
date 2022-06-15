@@ -303,11 +303,11 @@ main()
     
     /*	--- MAIN LOOP --- repeat test cases NTIMES times --- */
 
-	STREAM_TYPE sum = 0;
+	long long int sum = 0;
 	for(k=0; k<NTIMES; k++)
 	{
 		for (j=0; j<STREAM_ARRAY_SIZE; j++) {
-			sum += a[j];
+			sum = sum ^ (long long int)(a[j]);
 		}	    
 	}
 
