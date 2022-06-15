@@ -312,7 +312,7 @@ main()
 	{
 		for (j=0; j<STREAM_ARRAY_SIZE; j += 2) {
 			__m128i mm_a = _mm_load_si128(&a[j]);
-			sum += mm_a;
+			// sum += mm_a;
 		}	    
 	}
 
