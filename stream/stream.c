@@ -303,7 +303,7 @@ main()
     
     /*	--- MAIN LOOP --- repeat test cases NTIMES times --- */
 
-	double sum = 0;
+	STREAM_TYPE sum = 0;
 	for(k=0; k<NTIMES; k++)
 	{
 		for (j=0; j<STREAM_ARRAY_SIZE; j++) {
