@@ -343,7 +343,7 @@ main(int argc, char **argv)
 		}
 	}
 
-	printf("Read checksum %llu\n", read_checksum);
+	printf("Read checksum %lu\n", read_checksum);
 	printf("Throughput (MB/s): %lf\n", total_bytes/duration/1e6);
 
 //     scalar = 3.0;
