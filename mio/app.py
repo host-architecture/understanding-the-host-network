@@ -14,6 +14,7 @@ events_group_0 = {'lfb_occ': 'core/config=0x0000000000430148', 'lfb_cycles': 'co
 events_group_1 = {'load_l1_hits': 'core/config=0x00000000004301d1', 'load_l1_misses': 'core/config=0x00000000004308d1', 'load_l1_fbhit': 'core/config=0x00000000004340d1', 'loads': 'core/config=0x00000000004381d0'}
 events_group_2 = {'load_l2_hits': 'core/config=0x00000000004302d1', 'load_l2_misses': 'core/config=0x00000000004310d1', 'load_l3_hits': 'core/config=0x00000000004304d1', 'load_l3_misses': 'core/config=0x00000000004320d1'}
 events_group_3 = {'rpq_occupancy': 'imc/config=0x0000000000400080', 'rpq_ne_cycles': 'imc/config=0x0000000000400011', 'cas_count': 'imc/config=0x000000000040f04'}
+events_group_4 = {'act_count': 'imc/config=0x0000000000400b01'}
 
 def expand_ranges(x):
     result = []
@@ -79,6 +80,7 @@ def run_benchmark(args, env):
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l1.txt'%(prefix, num_cores)), events_group_1, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l2l3.txt'%(prefix, num_cores)), events_group_2, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-imc.txt'%(prefix, num_cores)), events_group_3, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-act.txt'%(prefix, num_cores)), events_group_4, RECORD_DURATION)
 
     
     if ant:
@@ -106,7 +108,7 @@ def main(argv=[]):
     parser.add_argument('--ant_inst_size', help='Instruction size for antagonist', type=int)
     parser.add_argument('--ant_pattern', help='Antagonist access pattern')
     parser.add_argument('--ant_writefrac', help='Antagonist write fraction (percentage)', type=int)
-    parser.add_argument('--ant_duration', help='Antagonist run duration', type=int, default=40)
+    parser.add_argument('--ant_duration', help='Antagonist run duration', type=int, default=50)
     parser.add_argument('--ant_mem_region', help='Antagonist memory region size', default='1g')
     parser.add_argument('--stats', help='Record stats', action='store_true')
     parser.add_argument('--disable_prefetch', help='Disable prefetchers', action='store_true')
