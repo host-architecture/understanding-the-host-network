@@ -224,6 +224,17 @@ double STREAM_Read16(uint64_t *read_checksum) {
 	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
 }
 
+double STREAM_Write16(uint64_t *read_checksum) {
+	int j;
+	__m128 val = _mm_set_epi32(1995, 1995, 2002, 2002);
+	__m128i sum = _mm_set_epi32(0, 0, 0, 0);
+	for (j=0; j<STREAM_ARRAY_SIZE; j += 2) {
+		_mm_store_si128(&a[j]);
+	}
+
+	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+}
+
 
 
 int
@@ -333,10 +344,21 @@ main(int argc, char **argv)
 	char *workload = argv[1];
 	int duration = atoi(argv[2]);
 
+	double (*execute)(uint64_t *) = NULL;
+	if(strcmp(workload, "Read16") == 0) {
+		execute = &STREAM_Read16;
+	} else if(strcmp(workload, "Write16") == 0) {
+		execute = &STREAM_Write16;
+	} else {
+		printf("Unknown workload\n");
+		exit(-1);
+	}
+
 	double start_tim = mysecond();
 	double total_bytes = 0.0;
 	uint64_t read_checksum = 0;
 	while(1) {
+		
 		total_bytes += STREAM_Read16(&read_checksum);
 
 		if(mysecond() - start_tim >= duration) {
@@ -344,7 +366,15 @@ main(int argc, char **argv)
 		}
 	}
 
+	double arr_checksum = 0.0;
+	for(j = 0; j < STREAM_ARRAY_SIZE; j++) {
+		arr_checksum += a[j];
+		arr_checksum += b[j];
+		arr_checksum += c[j];
+	}
+
 	printf("Read checksum %lu\n", read_checksum);
+	printf("Array checksum %lf\n", arr_checksum);
 	printf("Throughput (MB/s): %lf\n", total_bytes/duration/1e6);
 
 //     scalar = 3.0;
