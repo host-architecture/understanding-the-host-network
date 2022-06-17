@@ -46,6 +46,8 @@
 # include <float.h>
 # include <limits.h>
 # include <sys/time.h>
+#include <stdint.h>
+#include <string.h>
 #include <immintrin.h>
 
 /*-----------------------------------------------------------------------
@@ -177,9 +179,9 @@
 #define STREAM_TYPE double
 #endif
 
-static STREAM_TYPE	a[STREAM_ARRAY_SIZE+OFFSET] __attribute__((aligned(16))),
-			b[STREAM_ARRAY_SIZE+OFFSET] __attribute__((aligned(16))),
-			c[STREAM_ARRAY_SIZE+OFFSET] __attribute__((aligned(16)));
+static STREAM_TYPE	a[STREAM_ARRAY_SIZE+OFFSET] __attribute__((aligned(64))),
+			b[STREAM_ARRAY_SIZE+OFFSET] __attribute__((aligned(64))),
+			c[STREAM_ARRAY_SIZE+OFFSET] __attribute__((aligned(64)));
 
 static double	avgtime[4] = {0}, maxtime[4] = {0},
 		mintime[4] = {FLT_MAX,FLT_MAX,FLT_MAX,FLT_MAX};
@@ -205,8 +207,26 @@ extern void tuned_STREAM_Triad(STREAM_TYPE scalar);
 #ifdef _OPENMP
 extern int omp_get_num_threads();
 #endif
+
+double STREAM_Read16(uint64_t *read_checksum) {
+	int j;
+	__m128i sum = _mm_set_epi32(0, 0, 0, 0);
+	for (j=0; j<STREAM_ARRAY_SIZE; j += 2) {
+		__m128i mm_a = _mm_load_si128(&a[j]);
+		sum = _mm_add_epi32(sum, mm_a);
+	}
+
+	int chx0 = _mm_extract_epi32(sum, 0);
+	int chx1 = _mm_extract_epi32(sum, 1);
+	int chx2 = _mm_extract_epi32(sum, 2);
+	int chx3 = _mm_extract_epi32(sum, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+}
+
+
+
 int
-main()
+main(int argc, char **argv)
     {
     int			quantum, checktick();
     int			BytesPerWord;
@@ -304,21 +324,27 @@ main()
     
     /*	--- MAIN LOOP --- repeat test cases NTIMES times --- */
 
-	__m128i sum;
-	_mm_set_pd(0, 0);
-	__m128i val;
-	_mm_set_epi32(1995, 1995, 2002, 2002);
-	for(k=0; k<NTIMES; k++)
-	{
-		for (j=0; j<STREAM_ARRAY_SIZE; j += 2) {
-			__m128i mm_a = _mm_load_si128(&a[j]);
-			sum = _mm_add_epi32(sum, mm_a);
-		}	    
+	if(argc != 3) {
+		printf("Invalid args. Usage: ./stream <workload> <duration-in-secs>\n");
+		exit(-1);
 	}
 
-	if(_mm_test_all_ones(_mm_cmpeq_epi8(sum,val))) {
-		printf("The impossible has happened\n");
+	char *workload = argv[1];
+	int duration = atoi(argv[2]);
+
+	double start_tim = mysecond();
+	double total_bytes = 0.0;
+	uint64_t read_checksum = 0;
+	while(1) {
+		total_bytes += STREAM_Read16(&read_checksum);
+
+		if(mysecond() - start_tim >= duration) {
+			break;
+		}
 	}
+
+	printf("Read checksum %llu\n", read_checksum);
+	printf("Throughput (MB/s): %lf\n", total_bytes/duration/1e6);
 
 //     scalar = 3.0;
 //     for (k=0; k<NTIMES; k++)
