@@ -226,7 +226,7 @@ double STREAM_Read16(uint64_t *read_checksum) {
 
 double STREAM_Write16(uint64_t *read_checksum) {
 	int j;
-	__m128 val = _mm_set_epi32(1995, 1995, 2002, 2002);
+	__m128i val = _mm_set_epi32(1995, 1995, 2002, 2002);
 	__m128i sum = _mm_set_epi32(0, 0, 0, 0);
 	for (j=0; j<STREAM_ARRAY_SIZE; j += 2) {
 		_mm_store_si128(&a[j], val);
