@@ -221,6 +221,7 @@ double STREAM_Read16(uint64_t *read_checksum) {
 	int chx2 = _mm_extract_epi32(sum, 2);
 	int chx3 = _mm_extract_epi32(sum, 3);
 	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
 }
 
 
