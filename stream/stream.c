@@ -359,7 +359,7 @@ main(int argc, char **argv)
 	uint64_t read_checksum = 0;
 	while(1) {
 		
-		total_bytes += STREAM_Read16(&read_checksum);
+		total_bytes += (*execute)(&read_checksum);
 
 		if(mysecond() - start_tim >= duration) {
 			break;
