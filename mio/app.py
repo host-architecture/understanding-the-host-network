@@ -73,7 +73,7 @@ def run_benchmark(args, env):
         else:
             raise Exception('Unknown antagonist')
 
-        ant.init(os.path.join(env.get_stats_path(), '%s-cores%d.mlc.txt'%(prefix, num_cores)), cores, mem_numa, {})
+        ant.init(os.path.join(env.get_stats_path(), '%s-cores%d.%s.txt'%(prefix, num_cores, args.ant)), cores, mem_numa, {})
         if args.ant_inst_size:
             ant.set_instsize(args.ant_inst_size)
         if args.ant_pattern:

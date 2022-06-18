@@ -22,7 +22,7 @@ class STREAMRunner(Antagonist):
 
     def run(self, duration):
         for i in self.cores:
-            out_f = open(self.output_path + ('core%d'%(i)), 'w')
+            out_f = open(self.output_path + ('-core%d'%(i)), 'w')
         # numactl --membind 3 --physcpubind 3 ./stream Read16 10
             args = ['numactl', '--membind', str(self.mem_numa), '--physcpubind', str(i), self.stream_path]
         
