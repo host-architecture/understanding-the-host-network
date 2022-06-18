@@ -369,6 +369,7 @@ main(int argc, char **argv)
 
 	double start_tim = mysecond();
 	double total_bytes = 0.0;
+	double actual_duration;
 	uint64_t read_checksum = 0;
 	while(1) {
 		
@@ -376,7 +377,9 @@ main(int argc, char **argv)
 
 		// printf("a[0]: %lf\n", a[0]);
 
-		if(mysecond() - start_tim >= duration) {
+		double cur_tim = mysecond();
+		if(cur_tim - start_tim >= duration) {
+			actual_duration = cur_tim - start_tim;
 			break;
 		}
 	}
@@ -390,7 +393,7 @@ main(int argc, char **argv)
 
 	printf("Read checksum %lu\n", read_checksum);
 	printf("Array checksum %lf\n", arr_checksum);
-	printf("Throughput (MB/s): %lf\n", total_bytes/duration/1e6);
+	printf("Throughput (MB/s): %lf\n", total_bytes/actual_duration/1e6);
 
 //     scalar = 3.0;
 //     for (k=0; k<NTIMES; k++)
