@@ -374,7 +374,7 @@ main(int argc, char **argv)
 		
 		total_bytes += (*execute)(&read_checksum);
 
-		printf("a[0]: %lf\n", a[0]);
+		// printf("a[0]: %lf\n", a[0]);
 
 		if(mysecond() - start_tim >= duration) {
 			break;
@@ -529,7 +529,7 @@ void checkSTREAMresults ()
 	int	k,ierr,err;
 
     /* reproduce initialization */
-	aj = 1.0;
+	aj = 1995.0;
 	bj = 2.0;
 	cj = 0.0;
     /* a[] is modified during timing check */
