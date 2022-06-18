@@ -56,6 +56,11 @@ class Environment:
             raise Exception('FIO Path not specified')
         return self.fio_path
 
+    def get_stream_path(self):
+        if not self.stream_path:
+            raise Exception('STREAM Path not specified')
+        return self.stream_path
+
     def enable_prefetch(self):
         if os.system('wrmsr -a 0x1a4 0') != 0:
             raise Exception('Enable prefetch failed')
