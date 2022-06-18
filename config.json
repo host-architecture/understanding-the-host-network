@@ -2,5 +2,6 @@
     "MLC_PATH": "/home/midhul/mlc/Linux",
     "PCM_PATH": "/home/midhul/pcm",
     "STATS_PATH": "/home/midhul/membw-eval",
-    "FIO_PATH": "/home/midhul/fio"
+    "FIO_PATH": "/home/midhul/fio",
+    "STREAM_PATH": "/home/midhul/mio/stream"
 }

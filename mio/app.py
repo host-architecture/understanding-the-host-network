@@ -2,6 +2,7 @@ from .env import *
 from .mlc import *
 from .pcm import *
 from .fio import *
+from .stream import *
 
 import os, time
 import argparse
@@ -67,6 +68,8 @@ def run_benchmark(args, env):
 
         if args.ant == 'mlc':
             ant = MLCRunner(env.get_mlc_path())
+        elif args.ant == 'stream':
+            ant = STREAMRunner(env.get_stream_path())
         else:
             raise Exception('Unknown antagonist')
 
@@ -117,6 +120,8 @@ def cleanup():
     os.system('pkill -9 -f pcm')
     os.system('pkill -9 -f mlc')
     os.system('pkill -9 -f fio')
+    os.system('pkill -9 -f stream')
+
 
 
 def main(argv=[]):

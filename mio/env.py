@@ -11,6 +11,7 @@ class Environment:
         self.pcm_path = None
         self.stats_path = None
         self.fio_path = None
+        self.stream_path = None
 
         if 'MLC_PATH' in config_dict:
             self.mlc_path = config_dict['MLC_PATH']
@@ -23,6 +24,9 @@ class Environment:
 
         if 'FIO_PATH' in config_dict:
             self.fio_path = config_dict['FIO_PATH']
+
+        if 'STREAM_PATH' in config_dict:
+            self.stream_path = config_dict['STREAM_PATH']
 
         # Get cpu topology
         # TODO: Make this generic
