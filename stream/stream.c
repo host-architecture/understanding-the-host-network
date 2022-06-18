@@ -529,7 +529,7 @@ void checkSTREAMresults ()
 	int	k,ierr,err;
 
     /* reproduce initialization */
-	aj = 1995.0;
+	aj = 19954432432e20;
 	bj = 2.0;
 	cj = 0.0;
     /* a[] is modified during timing check */
