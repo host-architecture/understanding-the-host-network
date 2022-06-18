@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -O3 stream.c -msse4 -g -march=native
+CFLAGS = -O3 -msse4 -g -march=native
 
 FC = gfortran
 FFLAGS = -O2 -fopenmp
