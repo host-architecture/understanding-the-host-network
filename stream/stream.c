@@ -310,7 +310,7 @@ main(int argc, char **argv)
     /* Get initial value for system clock. */
 #pragma omp parallel for
     for (j=0; j<STREAM_ARRAY_SIZE; j++) {
-	    a[j] = 1995;
+	    a[j] = 1995.0;
 	    b[j] = 2.0;
 	    c[j] = 0.0;
 	}
