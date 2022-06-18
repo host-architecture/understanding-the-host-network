@@ -374,6 +374,8 @@ main(int argc, char **argv)
 		
 		total_bytes += (*execute)(&read_checksum);
 
+		printf("a[0]: %lf\n", a[0]);
+
 		if(mysecond() - start_tim >= duration) {
 			break;
 		}
