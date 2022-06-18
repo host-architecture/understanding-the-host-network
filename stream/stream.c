@@ -237,7 +237,7 @@ double STREAM_Write16(uint64_t *read_checksum) {
 
 double STREAM_ReadWrite16(uint64_t *read_checksum) {
 	int j;
-	__m128i val = _mm_set_epi32(0, 0, 0, 1);
+	__m128i val = _mm_set_epi32(1, 1, 1, 1);
 	for (j=0; j<STREAM_ARRAY_SIZE; j += 2) {
 		__m128i mm_a = _mm_load_si128(&a[j]);
 		_mm_store_si128(&a[j], _mm_add_epi32(mm_a, val));
