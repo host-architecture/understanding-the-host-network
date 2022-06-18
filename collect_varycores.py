@@ -25,6 +25,18 @@ def get_xput(config):
             cols = line.split()
             return float(cols[2])
 
+def get_stream_xput(config, num_cores):
+    xput = 0.0
+    for i in range(num_cores):
+        core_idx = CORE_LIST[i]
+        with open(os.path.join(STATS_PATH, config + '.stream.txt-core' + str(core_idx)), 'r') as f:
+            for line in f:
+                if not 'Throughput' in line:
+                    continue
+                cols = line.split()
+                xput += float(cols[2])
+    return xput
+
 def get_l1misslat(config, num_cores):
     core_lats = {}
     with open(os.path.join(STATS_PATH, config + '.pcm-latency.txt'), 'r') as f:
@@ -283,7 +295,8 @@ x_ncores = expand_ranges(core_range)
 for i in x_ncores:
     config = prefix + '-cores' + str(i)
     # row = '%d %f %f %f %f %f %f %f %f %f %f %d' % (i, get_xput(config), get_memreadbw(config), get_memwritebw(config), get_lfblat(config, i), get_lfbocc(config, i), get_lfbfull(config, i), get_l1miss(config, i), get_l2miss(config, i), get_l3miss(config, i), get_rpqocc(config), get_allloads(config, i))
-    row = '%d %f %f %f %f' % (i, get_fioxput(config, io_size), get_memreadbw(config), get_memwritebw(config), get_xput(config))
+    # row = '%d %f %f %f %f' % (i, get_fioxput(config, io_size), get_memreadbw(config), get_memwritebw(config), get_xput(config))
+    row = '%d %f %f %f %f %f %f %f %f %f %f %d' % (i, get_stream_xput(config, i), get_memreadbw(config), get_memwritebw(config), get_lfblat(config, i), get_lfbocc(config, i), get_lfbfull(config, i), get_l1miss(config, i), get_l2miss(config, i), get_l3miss(config, i), get_rpqocc(config), get_allloads(config, i))
     print(row)
 
 # for i in x_ncores:
