@@ -272,6 +272,16 @@ double STREAM_Write16(uint64_t *read_checksum) {
 	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
 }
 
+double STREAM_Write64(uint64_t *read_checksum) {
+	int j;
+	__m512i val = _mm512_set_epi32(1995, 1995, 2002, 2002, 1995, 1995, 2002, 2002, 1995, 1995, 2002, 2002, 1995, 1995, 2002, 2002);
+	for (j=0; j<STREAM_ARRAY_SIZE; j += 8) {
+		_mm512_store_si512(&a[j], val);
+	}
+
+	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+}
+
 double STREAM_ReadWrite16(uint64_t *read_checksum) {
 	int j;
 	__m128i val = _mm_set_epi32(1995, 1995, 2002, 2002);
@@ -414,6 +424,8 @@ main(int argc, char **argv)
 		execute = &STREAM_Read64;
 	} else if(strcmp(workload, "ReadWrite64") == 0) {
 		execute = &STREAM_ReadWrite64;
+	} else if(strcmp(workload, "Write64") == 0) {
+		execute = &STREAM_Write64;
 	} else {
 		printf("Unknown workload\n");
 		exit(-1);
