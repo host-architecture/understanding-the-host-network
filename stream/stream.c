@@ -227,7 +227,7 @@ double STREAM_Read16(uint64_t *read_checksum) {
 double STREAM_Read64(uint64_t *read_checksum) {
 	int j;
 	__m512i sum = _mm512_set_epi32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-	for (j=0; j<STREAM_ARRAY_SIZE; j += 2) {
+	for (j=0; j<STREAM_ARRAY_SIZE; j += 8) {
 		__m512i mm_a = _mm512_load_si512(&a[j]);
 		sum = _mm512_add_epi32(sum, mm_a);
 	}
