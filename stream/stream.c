@@ -212,8 +212,8 @@ double STREAM_Read16(uint64_t *read_checksum) {
 	int j;
 	__m128i sum = _mm_set_epi32(0, 0, 0, 0);
 	for (j=0; j<STREAM_ARRAY_SIZE; j += 2) {
-		__m128i mm_a = _mm_load_si128(&a[j]);
-		sum = _mm_add_epi32(sum, mm_a);
+		_mm_load_si128(&a[j]);
+		// sum = _mm_add_epi32(sum, mm_a);
 	}
 
 	int chx0 = _mm_extract_epi32(sum, 0);
