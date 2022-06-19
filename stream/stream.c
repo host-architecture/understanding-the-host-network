@@ -224,6 +224,43 @@ double STREAM_Read16(uint64_t *read_checksum) {
 	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
 }
 
+double STREAM_Read64(uint64_t *read_checksum) {
+	int j;
+	__m512i sum = _mm512_set_epi32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	for (j=0; j<STREAM_ARRAY_SIZE; j += 2) {
+		__m512i mm_a = _mm512_load_si512(&a[j]);
+		sum = _mm512_add_epi32(sum, mm_a);
+	}
+
+	int chx0, chx1, chx2, chx3;
+	__m128i chx;
+	chx = _mm512_extracti32x4_epi32(sum, 0);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 1);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 2);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 3);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+}
+
 double STREAM_Write16(uint64_t *read_checksum) {
 	int j;
 	__m128i val = _mm_set_epi32(1995, 1995, 2002, 2002);
@@ -362,6 +399,8 @@ main(int argc, char **argv)
 		execute = &STREAM_Write16;
 	} else if(strcmp(workload, "ReadWrite16") == 0){
 		execute = &STREAM_ReadWrite16;
+	} else if(strcmp(workload, "Read64") == 0){
+		execute = &STREAM_Read64;
 	} else {
 		printf("Unknown workload\n");
 		exit(-1);
