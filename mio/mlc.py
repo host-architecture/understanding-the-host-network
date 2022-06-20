@@ -39,6 +39,9 @@ class MLCRunner(Antagonist):
 
         if self.pattern == 'random':
             args.append('-U')
+            
+        if self.hugepages == True:
+            args.append('-h')
         
         self.proc = subprocess.Popen(args, stdout=out_f, stderr=subprocess.STDOUT)
 
