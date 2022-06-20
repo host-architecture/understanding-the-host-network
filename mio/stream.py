@@ -34,6 +34,8 @@ class STREAMRunner(Antagonist):
 
             if self.instsize == 16:
                 workload_str += '16'
+            elif self.instsize == 64:
+                workload_str += '64'
 
             # if self.pattern == 'random':
             #     args.append('-U')
@@ -52,7 +54,7 @@ class STREAMRunner(Antagonist):
             p.kill()
 
     def set_instsize(self, size):
-        if size not in [16]:
+        if size not in [16, 64]:
             raise Exception('Instruction size not supported')
         self.instsize = size
 

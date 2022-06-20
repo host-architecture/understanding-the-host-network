@@ -10,13 +10,14 @@ import atexit
 
 WARMUP_DURATION = 10
 RECORD_DURATION = 5
-RECORD_GROUPS = 5
+RECORD_GROUPS = 6
 FIO_PRESTART_DURATION = 5
 
 events_group_0 = {'lfb_occ': 'core/config=0x0000000000430148', 'lfb_cycles': 'core/config=0x0000000001430148', 'load_l1_misses': 'core/config=0x00000000004308d1', 'lfb_full': 'core/config=0x0000000000430248'}
 events_group_1 = {'load_l1_hits': 'core/config=0x00000000004301d1', 'load_l1_misses': 'core/config=0x00000000004308d1', 'load_l1_fbhit': 'core/config=0x00000000004340d1', 'loads': 'core/config=0x00000000004381d0'}
 events_group_2 = {'load_l2_hits': 'core/config=0x00000000004302d1', 'load_l2_misses': 'core/config=0x00000000004310d1', 'load_l3_hits': 'core/config=0x00000000004304d1', 'load_l3_misses': 'core/config=0x00000000004320d1'}
-events_group_3 = {'rpq_occupancy': 'imc/config=0x0000000000400080', 'rpq_ne_cycles': 'imc/config=0x0000000000400011', 'cas_count': 'imc/config=0x000000000040f04'}
+events_group_3 = {'rpq_occupancy': 'imc/config=0x0000000000400080', 'rpq_ne_cycles': 'imc/config=0x0000000000400011', 'cas_count': 'imc/config=0x000000000040f04', 'acts': 'imc/config=0x000000000040b01'}
+events_group_4 = {'rmm': 'imc/config=0x0000000000400107', 'wmm': 'imc/config=0x0000000000400207', 'wmm_to_rmm': 'imc/config=0x0000000000407c0'}
 
 SSD = ['/dev/nvme0n1', '/dev/nvme3n1', '/dev/nvme5n1', '/dev/nvme7n1', '/dev/nvme1n1', '/dev/nvme8n1']
 
@@ -102,6 +103,7 @@ def run_benchmark(args, env):
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l1.txt'%(prefix, num_cores)), events_group_1, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l2l3.txt'%(prefix, num_cores)), events_group_2, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-imc.txt'%(prefix, num_cores)), events_group_3, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-modes.txt'%(prefix, num_cores)), events_group_4, RECORD_DURATION)
     elif args.stats_membw:
         pcm_mem = PcmMemoryRunner(env.get_pcm_path())
         time.sleep(WARMUP_DURATION)
