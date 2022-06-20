@@ -66,6 +66,8 @@ def run_benchmark(args, env):
             ant.set_pattern(args.ant_pattern)
         if args.ant_writefrac:
             ant.set_writefrac(args.ant_writefrac)
+        if args.use_hugepages:
+            ant.set_hugepages()
 
         ant.run(ant_duration)
 
@@ -112,6 +114,7 @@ def main(argv=[]):
     parser.add_argument('--ant_mem_region', help='Antagonist memory region size', default='1g')
     parser.add_argument('--stats', help='Record stats', action='store_true')
     parser.add_argument('--disable_prefetch', help='Disable prefetchers', action='store_true')
+    parser.add_argument('--use_hugepages', help='Use hugepages', action='store_true')
 
     args = parser.parse_args(argv[1:])
     x_ncores = expand_ranges(args.ant_num_cores)
