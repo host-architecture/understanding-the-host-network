@@ -63,8 +63,8 @@ class MLCRunner(Antagonist):
             raise Exception('Pattern not supported')
         self.pattern = pattern
     
-    def set_hugepages(self, val):
-        self.hugepages = val
+    def set_hugepages(self):
+        self.hugepages = True
     
     def set_writefrac(self, val):
         if not val in [0, 50]:
