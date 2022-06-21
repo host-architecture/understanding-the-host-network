@@ -282,6 +282,33 @@ def get_actcount(config):
     
     return sum_acts
 
+def get_actcount_write(config):
+    numa_node = 3
+    channel_whitelist = [1,4]
+    acts = {}
+    with open(os.path.join(STATS_PATH, config + '.pcm-modes.txt'), 'r') as f:
+        for line in f:
+            if not re.search('\d\d\d\d-\d\d-\d\d,', line):
+                continue
+            cols = line.split(',')
+
+            for i in range(numa_node * NUM_CHANNELS, (numa_node+1)*NUM_CHANNELS):
+                channel_idx = (i - numa_node * NUM_CHANNELS + 1)
+                if not channel_idx in channel_whitelist:
+                    continue
+
+                acts[i] = int(cols[4*i + 6])
+
+    sum_acts = 0
+    for i in range(numa_node * NUM_CHANNELS, (numa_node+1)*NUM_CHANNELS):
+        channel_idx = (i - numa_node * NUM_CHANNELS + 1)
+        if not channel_idx in channel_whitelist:
+            continue
+        sum_acts += acts[i]
+
+    
+    return sum_acts
+
 def get_rmmcycles(config):
     numa_node = 3
     channel_whitelist = [1,4]
@@ -297,7 +324,7 @@ def get_rmmcycles(config):
                 if not channel_idx in channel_whitelist:
                     continue
 
-                acts[i] = int(cols[3*i + 3])
+                acts[i] = int(cols[4*i + 3])
 
     sum_acts = 0.0
     for i in range(numa_node * NUM_CHANNELS, (numa_node+1)*NUM_CHANNELS):
@@ -324,7 +351,7 @@ def get_wmmcycles(config):
                 if not channel_idx in channel_whitelist:
                     continue
 
-                acts[i] = int(cols[3*i + 4])
+                acts[i] = int(cols[4*i + 4])
 
     sum_acts = 0.0
     for i in range(numa_node * NUM_CHANNELS, (numa_node+1)*NUM_CHANNELS):
@@ -351,7 +378,7 @@ def get_wmmtormm(config):
                 if not channel_idx in channel_whitelist:
                     continue
 
-                acts[i] = int(cols[3*i + 5])
+                acts[i] = int(cols[4*i + 5])
 
     sum_acts = 0.0
     for i in range(numa_node * NUM_CHANNELS, (numa_node+1)*NUM_CHANNELS):
@@ -404,7 +431,7 @@ for i in x_ncores:
     # row = '%d %f %f %f %f %f %f %f %f %f %f %d' % (i, get_xput(config), get_memreadbw(config), get_memwritebw(config), get_lfblat(config, i), get_lfbocc(config, i), get_lfbfull(config, i), get_l1miss(config, i), get_l2miss(config, i), get_l3miss(config, i), get_rpqocc(config), get_allloads(config, i))
     # row = '%d %f %f %f %f' % (i, get_fioxput(config, io_size), get_memreadbw(config), get_memwritebw(config), get_stream_xput(config, i, 1))
     # row = '%d %f %f %f %f %f %f %f %f %f' % (i, get_fioxput(config, io_size), get_memreadbw(config), get_memwritebw(config),  get_rpqocc(config), get_allloads(config, i), get_actcount(config), get_rmmcycles(config), get_wmmcycles(config), get_wmmtormm(config))
-    row = '%d %f %f %f %f %f %f %f %f %f %f %d %d %f %f %f' % (i, get_stream_xput(config, i), get_memreadbw(config), get_memwritebw(config), get_lfblat(config, i), get_lfbocc(config, i), get_lfbfull(config, i), get_l1miss(config, i), get_l2miss(config, i), get_l3miss(config, i), get_rpqocc(config), get_allloads(config, i), get_actcount(config), get_rmmcycles(config), get_wmmcycles(config), get_wmmtormm(config))
+    row = '%d %f %f %f %f %f %f %f %f %f %f %d %d %f %f %f %d' % (i, get_stream_xput(config, i), get_memreadbw(config), get_memwritebw(config), get_lfblat(config, i), get_lfbocc(config, i), get_lfbfull(config, i), get_l1miss(config, i), get_l2miss(config, i), get_l3miss(config, i), get_rpqocc(config), get_allloads(config, i), get_actcount(config), get_rmmcycles(config), get_wmmcycles(config), get_wmmtormm(config), get_actcount_write(config))
     print(row)
 
 # for i in x_ncores:
