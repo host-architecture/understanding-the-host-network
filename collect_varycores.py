@@ -1,7 +1,7 @@
 import os, sys, re, subprocess
 
 STATS_PATH = '/home/midhul/membw-eval'
-CORE_LIST=[7,11,15,19,23,27,31,3,0,4,8,12,16,20,24,28,1,5,9,13,17,21,25,29,2,6,10,14,18,22,26,30]
+CORE_LIST=[3,7,11,15,19,23,27,31,0,4,8,12,16,20,24,28,1,5,9,13,17,21,25,29,2,6,10,14,18,22,26,30]
 NUM_CHANNELS=6
 
 def expand_ranges(x):
