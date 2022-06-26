@@ -251,7 +251,7 @@ def get_rpqocc(config):
         channel_idx = (i - numa_node * NUM_CHANNELS + 1)
         if not channel_idx in channel_whitelist:
             continue
-        sum_occ += float(agg_occ[i])/float(cycles[i])
+        sum_occ += float(agg_occ[i])/1466500000.0
 
     return sum_occ / float(len(channel_whitelist))
 
