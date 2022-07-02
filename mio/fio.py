@@ -15,6 +15,7 @@ class FIORunner:
         self.io_depth = io_depth
         self.write_frac = write_frac
         self.disk = disk
+        self.rate_cap = None
 
         self.proc = None
 
@@ -31,8 +32,15 @@ class FIORunner:
             args.append('--rw=randread')
         elif self.write_frac == 100:
             args.append('--rw=randwrite')
+
+        if self.rate_cap:
+            args.append('--rate_iops=%d'%(self.rate_cap))
         
         self.proc = subprocess.Popen(args, stdout=out_f, stderr=subprocess.STDOUT)
+
+
+    def set_ratecap(self, val):
+        self.rate_cap = val
 
     def wait(self):
         if self.proc:

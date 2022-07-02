@@ -30,6 +30,8 @@ class MLCRunner(Antagonist):
             args.append('-R')
         elif self.write_frac == 50:
             args.append('-W5')
+        elif self.write_frac == 100:
+            args.append('-W6')
 
         if self.instsize == 32:
             args.append('-Y')
@@ -63,7 +65,7 @@ class MLCRunner(Antagonist):
         self.hugepages = val
     
     def set_writefrac(self, val):
-        if not val in [0, 50]:
+        if not val in [0, 50, 100]:
             raise Exception('Write fraction not supported')
 
         self.write_frac = val

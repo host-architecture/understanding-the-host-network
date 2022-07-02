@@ -1,7 +1,7 @@
 import os, sys, re, subprocess
 
 STATS_PATH = '/home/midhul/membw-eval'
-CORE_LIST=[7,11,15,19,23,27,31,3,0,4,8,12,16,20,24,28,1,5,9,13,17,21,25,29,2,6,10,14,18,22,26,30]
+CORE_LIST=[3,7,11,15,19,23,27,31,0,4,8,12,16,20,24,28,1,5,9,13,17,21,25,29,2,6,10,14,18,22,26,30]
 NUM_CHANNELS=6
 
 def expand_ranges(x):
@@ -18,7 +18,7 @@ def expand_ranges(x):
 
 
 def get_xput(config):
-    with open(os.path.join(STATS_PATH, config + '.mlc.txt'), 'r') as f:
+    with open(os.path.join(STATS_PATH, config + '.mlc2.txt'), 'r') as f:
         for line in f:
             if not '0000' in line:
                 continue
@@ -432,7 +432,8 @@ for i in x_ncores:
     # row = '%d %f %f %f %f' % (i, get_fioxput(config, io_size), get_memreadbw(config), get_memwritebw(config), get_stream_xput(config, i, 1))
     # row = '%d %f %f %f %f %f %f %f %f %f %f' % (i, get_fioxput(config, io_size), get_memreadbw(config), get_memwritebw(config),  get_rpqocc(config), get_allloads(config, i), get_actcount(config), get_rmmcycles(config), get_wmmcycles(config), get_wmmtormm(config), get_actcount_write(config))
     # row = '%d %f %f %f %f %f %f %f %f %f %f %d %d %f %f %f %d' % (i, get_stream_xput(config, i), get_memreadbw(config), get_memwritebw(config), get_lfblat(config, i), get_lfbocc(config, i), get_lfbfull(config, i), get_l1miss(config, i), get_l2miss(config, i), get_l3miss(config, i), get_rpqocc(config), get_allloads(config, i), get_actcount(config), get_rmmcycles(config), get_wmmcycles(config), get_wmmtormm(config), get_actcount_write(config))
-    row = '%d %f %f %f %f %f %f %f %f %f %f %f %d %d %f %f %f %d' % (i, get_fioxput(config, io_size), get_stream_xput(config, i), get_memreadbw(config), get_memwritebw(config), get_lfblat(config, i), get_lfbocc(config, i), get_lfbfull(config, i), get_l1miss(config, i), get_l2miss(config, i), get_l3miss(config, i), get_rpqocc(config), get_allloads(config, i), get_actcount(config), get_rmmcycles(config), get_wmmcycles(config), get_wmmtormm(config), get_actcount_write(config))
+    # row = '%d %f %f %f %f %f %f %f %f %f %f %f %d %d %f %f %f %d' % (i, get_fioxput(config, io_size), get_stream_xput(config, i), get_memreadbw(config), get_memwritebw(config), get_lfblat(config, i), get_lfbocc(config, i), get_lfbfull(config, i), get_l1miss(config, i), get_l2miss(config, i), get_l3miss(config, i), get_rpqocc(config), get_allloads(config, i), get_actcount(config), get_rmmcycles(config), get_wmmcycles(config), get_wmmtormm(config), get_actcount_write(config))
+    row = '%d %f %f %f %f %f %f %f %f %f %d %d %f %f %f %d' % (i, get_memreadbw(config), get_memwritebw(config), get_lfblat(config, i), get_lfbocc(config, i), get_lfbfull(config, i), get_l1miss(config, i), get_l2miss(config, i), get_l3miss(config, i), get_rpqocc(config), get_allloads(config, i), get_actcount(config), get_rmmcycles(config), get_wmmcycles(config), get_wmmtormm(config), get_actcount_write(config))
     print(row)
 
 # for i in x_ncores:

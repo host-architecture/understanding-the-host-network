@@ -84,6 +84,27 @@ def run_benchmark(args, env):
 
         ant.run(ant_duration)
 
+    ant2 = None
+    if args.ant2:
+        cores2 = [int(x) for x in args.ant2_cpus.split(',')]
+
+        if args.ant2 == 'mlc':
+            ant2 = MLCRunner(env.get_mlc_path())
+        elif args.ant2 == 'stream':
+            ant2 = STREAMRunner(env.get_stream_path())
+        else:
+            raise Exception('Unknown antagonist 2')
+
+        ant2.init(os.path.join(env.get_stats_path(), '%s-cores%d.%s2.txt'%(prefix, num_cores, args.ant2)), cores2, args.ant2_mem_numa, {})
+        if args.ant2_inst_size:
+            ant2.set_instsize(args.ant2_inst_size)
+        if args.ant2_pattern:
+            ant2.set_pattern(args.ant2_pattern)
+        if args.ant2_writefrac:
+            ant2.set_writefrac(args.ant2_writefrac)
+
+        ant2.run(args.ant2_duration)
+
     fios = []
     if args.fio:
         if args.ant:
@@ -91,6 +112,9 @@ def run_benchmark(args, env):
         for i in range(args.fio_num_ssds):
             fio = FIORunner(env.get_fio_path())
             fio.init(os.path.join(env.get_stats_path(), '%s-cores%d.fio%d.txt'%(prefix, num_cores, i)), args.fio_cpus, args.fio_mem_numa, args.fio_iosize, args.fio_iodepth, args.fio_writefrac, SSD[i])
+            if args.fio_rate:
+                print('Setting fio rate cap')
+                fio.set_ratecap(args.fio_rate)
             fio.run(args.fio_duration)
             fios.append(fio)
 
@@ -116,6 +140,9 @@ def run_benchmark(args, env):
 
     if ant:
         ant.wait()
+
+    if ant2:
+        ant2.wait()
 
 def cleanup():
     # TODO: Hacky
@@ -154,6 +181,14 @@ def main(argv=[]):
     parser.add_argument('--fio_iodepth', help='what it says', type=int, default=1)
     parser.add_argument('--fio_num_ssds', help='what it says', type=int, default=1)
     parser.add_argument('--fio_duration', help='what it says', type=int, default=10)
+    parser.add_argument('--fio_rate', help='what it says', type=int)
+    parser.add_argument('--ant2', help='What antagonist to use (mlc/stream)')
+    parser.add_argument('--ant2_cpus', help='List of cores to run antagonist on', default='3')
+    parser.add_argument('--ant2_mem_numa', help='Number of cores to run antagonist on', type=int, default=0)
+    parser.add_argument('--ant2_inst_size', help='Instruction size for antagonist', type=int)
+    parser.add_argument('--ant2_pattern', help='Antagonist access pattern')
+    parser.add_argument('--ant2_writefrac', help='Antagonist write fraction (percentage)', type=int)
+    parser.add_argument('--ant2_duration', help='Antagonist run duration', type=int, default=40)
 
 
     args = parser.parse_args(argv[1:])
