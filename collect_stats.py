@@ -59,6 +59,10 @@ filepath= os.path.join(STATS_PATH, args.config + '.pcm-modes.txt')
 if os.path.isfile(filepath):
     ss.load_pcm_raw(filepath)
 
+filepath= os.path.join(STATS_PATH, args.config + '.pcm-cas.txt')
+if os.path.isfile(filepath):
+    ss.load_pcm_raw(filepath)
+
 filepath= os.path.join(STATS_PATH, args.config + '.stream.txt')
 if len(glob.glob(filepath + '-core*')) > 0:
     ss.load_stream(filepath)
