@@ -7,7 +7,7 @@ FFLAGS = -O2 -fopenmp
 all: stream
 
 stream:
-	$(CC) $(CFLAGS) -DNTIMES=1000 -DSTREAM_ARRAY_SIZE=125000000 stream.c -o stream
+	$(CC) $(CFLAGS) -DNTIMES=1000 -DSTREAM_ARRAY_SIZE=134217728 stream.c -o stream
 
 stream_f.exe: stream.f mysecond.o
 	$(CC) $(CFLAGS) -c mysecond.c

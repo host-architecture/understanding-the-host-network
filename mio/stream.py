@@ -24,7 +24,8 @@ class STREAMRunner(Antagonist):
         for i in self.cores:
             out_f = open(self.output_path + ('-core%d'%(i)), 'w')
         # numactl --membind 3 --physcpubind 3 ./stream Read16 10
-            args = ['numactl', '--membind', str(self.mem_numa), '--physcpubind', str(i), self.stream_path]
+            args = []
+            args += ['numactl', '--membind', str(self.mem_numa), '--physcpubind', str(i), self.stream_path]
         
             workload_str = ''
             if self.write_frac == 0:
@@ -37,13 +38,21 @@ class STREAMRunner(Antagonist):
             elif self.instsize == 64:
                 workload_str += '64'
 
+            if self.pattern == 'random':
+                workload_str += 'Random'
+
             # if self.pattern == 'random':
             #     args.append('-U')
 
             args.append(workload_str)
             args.append(str(duration))
+
+            my_env = os.environ.copy()
+
+            if self.hugepages:
+                my_env['STREAM_HUGEPAGES'] = 'on'
             
-            self.procs.append(subprocess.Popen(args, stdout=out_f, stderr=subprocess.STDOUT))
+            self.procs.append(subprocess.Popen(args, stdout=out_f, stderr=subprocess.STDOUT, env=my_env))
 
     def wait(self):
         for p in self.procs:
@@ -59,7 +68,7 @@ class STREAMRunner(Antagonist):
         self.instsize = size
 
     def set_pattern(self, pattern):
-        if pattern not in ['sequential']:
+        if pattern not in ['sequential', 'random']:
             raise Exception('Pattern not supported')
         self.pattern = pattern
     

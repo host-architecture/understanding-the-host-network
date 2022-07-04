@@ -10,13 +10,13 @@ import atexit
 
 WARMUP_DURATION = 10
 RECORD_DURATION = 5
-RECORD_GROUPS = 6
+RECORD_GROUPS = 7
 FIO_PRESTART_DURATION = 5
 
-events_group_0 = {'lfb_occ': 'core/config=0x0000000000430148', 'lfb_cycles': 'core/config=0x0000000001430148', 'load_l1_misses': 'core/config=0x00000000004308d1', 'lfb_full': 'core/config=0x0000000000430248'}
+events_group_0 = {'lfb_occ_agg': 'core/config=0x0000000000430148', 'lfb_cycles': 'core/config=0x0000000001430148', 'lfb_l1_misses': 'core/config=0x00000000004308d1', 'lfb_full': 'core/config=0x0000000000430248'}
 events_group_1 = {'load_l1_hits': 'core/config=0x00000000004301d1', 'load_l1_misses': 'core/config=0x00000000004308d1', 'load_l1_fbhit': 'core/config=0x00000000004340d1', 'loads': 'core/config=0x00000000004381d0'}
 events_group_2 = {'load_l2_hits': 'core/config=0x00000000004302d1', 'load_l2_misses': 'core/config=0x00000000004310d1', 'load_l3_hits': 'core/config=0x00000000004304d1', 'load_l3_misses': 'core/config=0x00000000004320d1'}
-events_group_3 = {'rpq_occupancy': 'imc/config=0x0000000000400080', 'rpq_ne_cycles': 'imc/config=0x0000000000400011', 'cas_count': 'imc/config=0x000000000040f04', 'acts_read': 'imc/config=0x000000000040101'}
+events_group_3 = {'rpq_occ_agg': 'imc/config=0x0000000000400080', 'rpq_ne_cycles': 'imc/config=0x0000000000400011', 'cas_count': 'imc/config=0x000000000040f04', 'acts_read': 'imc/config=0x000000000040101'}
 events_group_4 = {'rmm': 'imc/config=0x0000000000400107', 'wmm': 'imc/config=0x0000000000400207', 'wmm_to_rmm': 'imc/config=0x0000000000407c0', 'acts_write': 'imc/config=0x000000000040201'}
 
 SSD = ['/dev/nvme0n1', '/dev/nvme3n1', '/dev/nvme5n1', '/dev/nvme7n1', '/dev/nvme1n1', '/dev/nvme8n1']
@@ -48,13 +48,14 @@ def run_benchmark(args, env):
 
     print('Running %s-cores%d'%(prefix, num_cores))
 
-    env.enable_prefetch()
+    if not args.notouch_prefetch:
+        env.enable_prefetch()
 
-    if args.disable_prefetch:
-        env.disable_prefetch()
+        if args.disable_prefetch:
+            env.disable_prefetch()
 
-    if args.disable_prefetch_l1:
-        env.disable_prefetch_l1()
+        if args.disable_prefetch_l1:
+            env.disable_prefetch_l1()
 
     ant = None
 
@@ -81,6 +82,8 @@ def run_benchmark(args, env):
             ant.set_pattern(args.ant_pattern)
         if args.ant_writefrac:
             ant.set_writefrac(args.ant_writefrac)
+        if args.ant_hugepages:
+            ant.set_hugepages(True)
 
         ant.run(ant_duration)
 
@@ -122,6 +125,8 @@ def run_benchmark(args, env):
         pcm_mem = PcmMemoryRunner(env.get_pcm_path())
         time.sleep(WARMUP_DURATION)
         pcm_mem.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-memory.txt'%(prefix, num_cores)), RECORD_DURATION)
+        pcm_latency = PcmLatencyRunner(env.get_pcm_path())
+        pcm_latency.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-latency.txt'%(prefix, num_cores)), RECORD_DURATION)
         pcm_raw = PcmRawRunner(env.get_pcm_path())
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-lfb.txt'%(prefix, num_cores)), events_group_0, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l1.txt'%(prefix, num_cores)), events_group_1, RECORD_DURATION)
@@ -169,6 +174,7 @@ def main(argv=[]):
     parser.add_argument('--ant_pattern', help='Antagonist access pattern')
     parser.add_argument('--ant_writefrac', help='Antagonist write fraction (percentage)', type=int)
     parser.add_argument('--ant_duration', help='Antagonist run duration', type=int, default=40)
+    parser.add_argument('--ant_hugepages', help='Enable hugepages', action='store_true')
     parser.add_argument('--stats', help='Record stats', action='store_true')
     parser.add_argument('--stats_membw', help='Record membw stats', action='store_true')
     parser.add_argument('--disable_prefetch', help='Disable prefetchers', action='store_true')
@@ -189,6 +195,7 @@ def main(argv=[]):
     parser.add_argument('--ant2_pattern', help='Antagonist access pattern')
     parser.add_argument('--ant2_writefrac', help='Antagonist write fraction (percentage)', type=int)
     parser.add_argument('--ant2_duration', help='Antagonist run duration', type=int, default=40)
+    parser.add_argument('--notouch_prefetch', help='Do not modify prefetchers', action='store_true')
 
 
     args = parser.parse_args(argv[1:])

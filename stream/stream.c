@@ -48,7 +48,12 @@
 # include <sys/time.h>
 #include <stdint.h>
 #include <string.h>
+ #define _GNU_SOURCE
+#include <sys/mman.h>
 #include <immintrin.h>
+
+#define MAP_HUGE_1GB (30 << MAP_HUGE_SHIFT)
+
 
 /*-----------------------------------------------------------------------
  * INSTRUCTIONS:
@@ -179,9 +184,13 @@
 #define STREAM_TYPE double
 #endif
 
-static STREAM_TYPE	a[STREAM_ARRAY_SIZE+OFFSET] __attribute__((aligned(64))),
-			b[STREAM_ARRAY_SIZE+OFFSET] __attribute__((aligned(64))),
-			c[STREAM_ARRAY_SIZE+OFFSET] __attribute__((aligned(64)));
+// static STREAM_TYPE	a[STREAM_ARRAY_SIZE+OFFSET] __attribute__((aligned(64))),
+// 			b[STREAM_ARRAY_SIZE+OFFSET] __attribute__((aligned(64))),
+// 			c[STREAM_ARRAY_SIZE+OFFSET] __attribute__((aligned(64)));
+
+STREAM_TYPE *a;
+STREAM_TYPE *b;
+STREAM_TYPE *c;
 
 static double	avgtime[4] = {0}, maxtime[4] = {0},
 		mintime[4] = {FLT_MAX,FLT_MAX,FLT_MAX,FLT_MAX};
@@ -230,6 +239,55 @@ double STREAM_Read64(uint64_t *read_checksum) {
 	for (j=0; j<STREAM_ARRAY_SIZE; j += 8) {
 		__m512i mm_a = _mm512_load_si512(&a[j]);
 		sum = _mm512_add_epi32(sum, mm_a);
+	}
+
+	int chx0, chx1, chx2, chx3;
+	__m128i chx;
+	chx = _mm512_extracti32x4_epi32(sum, 0);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 1);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 2);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 3);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+}
+
+// This needs to be a power of two
+#define READ64_ARRAY_COUNT (STREAM_ARRAY_SIZE/8)
+
+// Using XORShift random generator
+double STREAM_Read64_Random(uint64_t *read_checksum) {
+	int j;
+	__m512i sum = _mm512_set_epi32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	uint64_t x = 432437644;
+	srand(x);
+	for (j=0; j<READ64_ARRAY_COUNT; j++) {
+		__m512i mm_a = _mm512_load_si512(&a[8*(rand() & (READ64_ARRAY_COUNT - 1))]);
+		sum = _mm512_add_epi32(sum, mm_a);
+		//x ^= x << 13;
+		//x ^= x >> 7;
+		//x ^= x << 17;
+		// x ^= x >> 12;
+		// x ^= x << 25;
+		// x ^= x >> 27;
 	}
 
 	int chx0, chx1, chx2, chx3;
@@ -315,6 +373,41 @@ main(int argc, char **argv)
     ssize_t		j;
     STREAM_TYPE		scalar;
     double		t, times[4][NTIMES];
+
+	if(getenv("STREAM_HUGEPAGES") != NULL) {
+		a = mmap(0, STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_HUGETLB | MAP_ANONYMOUS | MAP_HUGE_1GB, -1, 0);
+		if(a == MAP_FAILED) {
+			printf("mmap hugepages failed for a\n");
+			exit(-1);
+		}
+		b = mmap(0, STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_HUGETLB | MAP_ANONYMOUS | MAP_HUGE_1GB, -1, 0);
+		if(b == MAP_FAILED) {
+			printf("mmap hugepages failed for b\n");
+			exit(-1);
+		}
+		c = mmap(0, STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_HUGETLB | MAP_ANONYMOUS | MAP_HUGE_1GB, -1, 0);
+		if(c == MAP_FAILED) {
+			printf("mmap hugepages failed for c\n");
+			exit(-1);
+		}
+	} else {
+		if(posix_memalign(&a, 64, STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE)) != 0) {
+		printf("Failed to alloc buffer a\n");
+		exit(-1);
+		}
+		if(posix_memalign(&b, 64, STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE)) != 0) {
+			printf("Failed to alloc buffer b\n");
+			exit(-1);
+		}
+		if(posix_memalign(&c, 64, STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE)) != 0) {
+			printf("Failed to alloc buffer c\n");
+			exit(-1);
+		}
+	}
+	
+
+	
+	printf("Allocated buffers\n");
 
     /* --- SETUP --- determine precision and check timing --- */
 
@@ -426,6 +519,8 @@ main(int argc, char **argv)
 		execute = &STREAM_ReadWrite64;
 	} else if(strcmp(workload, "Write64") == 0) {
 		execute = &STREAM_Write64;
+	} else if(strcmp(workload, "Read64Random") == 0){
+		execute = &STREAM_Read64_Random;
 	} else {
 		printf("Unknown workload\n");
 		exit(-1);
