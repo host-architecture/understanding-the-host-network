@@ -278,13 +278,14 @@ double STREAM_Read64_Random(uint64_t *read_checksum) {
 	int j;
 	__m512i sum = _mm512_set_epi32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	uint64_t x = 432437644;
-	srand(x);
+	//srand(x);
 	for (j=0; j<READ64_ARRAY_COUNT; j++) {
-		__m512i mm_a = _mm512_load_si512(&a[8*(rand() & (READ64_ARRAY_COUNT - 1))]);
+		__m512i mm_a = _mm512_load_si512(&a[8*(x & (READ64_ARRAY_COUNT - 1))]);
+		//printf("[ADDR] %x\n", 8*8*(x & (READ64_ARRAY_COUNT - 1)));
 		sum = _mm512_add_epi32(sum, mm_a);
-		//x ^= x << 13;
-		//x ^= x >> 7;
-		//x ^= x << 17;
+		x ^= x << 13;
+		x ^= x >> 7;
+		x ^= x << 17;
 		// x ^= x >> 12;
 		// x ^= x << 25;
 		// x ^= x >> 27;
@@ -380,12 +381,12 @@ main(int argc, char **argv)
 			printf("mmap hugepages failed for a\n");
 			exit(-1);
 		}
-		b = mmap(0, STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_HUGETLB | MAP_ANONYMOUS | MAP_HUGE_1GB, -1, 0);
+	//	b = mmap(0, STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_HUGETLB | MAP_ANONYMOUS | MAP_HUGE_1GB, -1, 0);
 		if(b == MAP_FAILED) {
 			printf("mmap hugepages failed for b\n");
 			exit(-1);
 		}
-		c = mmap(0, STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_HUGETLB | MAP_ANONYMOUS | MAP_HUGE_1GB, -1, 0);
+	//	c = mmap(0, STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_HUGETLB | MAP_ANONYMOUS | MAP_HUGE_1GB, -1, 0);
 		if(c == MAP_FAILED) {
 			printf("mmap hugepages failed for c\n");
 			exit(-1);
@@ -462,8 +463,8 @@ main(int argc, char **argv)
 #pragma omp parallel for
     for (j=0; j<STREAM_ARRAY_SIZE; j++) {
 	    a[j] = 1995.0;
-	    b[j] = 2.0;
-	    c[j] = 0.0;
+	    //b[j] = 2.0;
+	    //c[j] = 0.0;
 	}
 
     printf(HLINE);
@@ -546,8 +547,8 @@ main(int argc, char **argv)
 	double arr_checksum = 0.0;
 	for(j = 0; j < STREAM_ARRAY_SIZE; j++) {
 		arr_checksum += a[j];
-		arr_checksum += b[j];
-		arr_checksum += c[j];
+		//arr_checksum += b[j];
+		//arr_checksum += c[j];
 	}
 
 	printf("Read checksum %lu\n", read_checksum);
