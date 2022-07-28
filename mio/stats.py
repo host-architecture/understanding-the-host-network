@@ -11,7 +11,17 @@ class StatStore:
             'l1_missrate': (lambda x, y, z: (x+y)/z, ['load_l1_misses', 'load_l1_fbhit', 'loads']),
             'l2_missrate': (lambda x, y: (x)/(x+y), ['load_l2_misses', 'load_l2_hits']),
             'l3_missrate': (lambda x, y: (x)/(x+y), ['load_l3_misses', 'load_l3_hits']),
-            'rpq_occupancy': (lambda x: x/1466500000.0, ['rpq_occ_agg'])
+            'rpq_occupancy': (lambda x: x/1466500000.0, ['rpq_occ_agg']),
+            'switching_delay': (lambda z, x, y: x*(y/(z*1e6/64))*8.18, ['memreadbw', 'rpq_occupancy', 'wmm_to_rmm']),
+            'write_hol': (lambda z, x, y: x*(y/z)*2.73, ['memreadbw', 'rpq_occupancy', 'memwritebw']),
+            'act_penalty': (lambda z, x, y: ((x+y)/(z*1e6/64))*15, ['memreadbw', 'acts_read', 'acts_byp']),
+            'pre_penalty': (lambda w, x, y, z: (x/(x+y))*(z/(w*1e6/64))*15, ['memreadbw', 'pre_miss', 'pre_close', 'pre_rd']),
+            'remainder': (lambda x: max(x-1, 0) * 2.73, ['rpq_occupancy']),
+            'row_miss_penalty': (lambda x, y: x + y, ['act_penalty', 'pre_penalty']),
+            'estimated_qd': (lambda x,y,z,w: x + y + z + w, ['switching_delay', 'write_hol', 'row_miss_penalty', 'remainder']),
+            'actual_qd': (lambda x: max(x - 71.3, 0), ['l1_miss_latency']),
+            'estimated_latency': (lambda x: 71.3 + x, ['estimated_qd']),
+            'read_activations': (lambda x, y: x + y, ['acts_read', 'acts_byp'])
         }
 
     def load_pcm_raw(self, filepath):
@@ -93,21 +103,21 @@ class StatStore:
 
                     self.d[metric][space_unit].append(float(cols[i].strip()))
 
-    def load_stream(self, filepath):
+    def load_stream(self, filepath, label='stream_xput'):
         stream_files = glob.glob(filepath + '-core*')
-        if not 'stream_xput' in self.d:
-            self.d['stream_xput'] = {}
+        if not label in self.d:
+            self.d[label] = {}
         for sfile in stream_files:
             core_idx = int(re.match('.*-core(\d+)$', sfile)[1])
             space_unit = 'CORE%d' % (core_idx)
-            if not space_unit in self.d['stream_xput']:
-                self.d['stream_xput'][space_unit] = []
+            if not space_unit in self.d[label]:
+                self.d[label][space_unit] = []
             with open(sfile, 'r') as f:
                 for line in f:
                     if not 'Throughput' in line:
                         continue
                     cols = line.split()
-                    self.d['stream_xput'][space_unit].append(float(cols[2]))
+                    self.d[label][space_unit].append(float(cols[2]))
 
     def load_mlc(self, filepath):
         with open(filepath, 'r') as f:
@@ -120,7 +130,7 @@ class StatStore:
                 self.d['mlc_xput']['ALL'] = [float(cols[2])]
 
     def load_fio(self, config, io_size):
-        self.d['fio_xput'] = {'ALL': float(subprocess.check_output(['./collect_fio.sh', config, str(io_size)]))}
+        self.d['fio_xput'] = {'ALL': [float(subprocess.check_output(['./collect_fio.sh', config, str(io_size)]))]}
 
     def compute_metric(self, metric):
         if not metric in self.derived_metrics:
@@ -128,6 +138,11 @@ class StatStore:
 
         func = self.derived_metrics[metric][0]
         input_metrics = self.derived_metrics[metric][1]
+        # Recursively compute derived input metrics
+        for inp_metric in input_metrics:
+            if not inp_metric in self.d and inp_metric in self.derived_metrics:
+                # print('resursilvey computing metric: ' + inp_metric)
+                self.compute_metric(inp_metric)
 
         self.d[metric] = {}
         for space_unit in self.d[input_metrics[0]]:
@@ -135,6 +150,11 @@ class StatStore:
             for i in range(len(self.d[input_metrics[0]][space_unit])):
                 input_metric_vals = []
                 for j in range(len(input_metrics)):
+                    if not space_unit in self.d[input_metrics[j]]:
+                        print('Not found space unit')
+                        print(space_unit)
+                        print(input_metrics[j])
+                        print(self.d[input_metrics[j]])
                     input_metric_vals.append(self.d[input_metrics[j]][space_unit][i])
                 self.d[metric][space_unit].append(func(*input_metric_vals))
 
@@ -193,9 +213,11 @@ class StatStore:
                     raise Exception('unknown agg_time')
 
         if agg_space == 'sum':
-            return sum([res[x] for x in res])
+            return [sum([res[x] for x in res])]
         elif agg_space == 'avg':
-            return sum([res[x] for x in res]) / float(len(res))
+            return [sum([res[x] for x in res]) / float(len(res))]
+        elif agg_space == 'none':
+            return [res[x] for x in res]
         else:
             raise Exception('unknown agg_space')
 

@@ -32,6 +32,8 @@ class STREAMRunner(Antagonist):
                 workload_str += 'Read'
             elif self.write_frac == 50:
                 workload_str += 'ReadWrite'
+            elif self.write_frac == 100:
+                workload_str += 'NtWrite'
 
             if self.instsize == 16:
                 workload_str += '16'
@@ -41,8 +43,8 @@ class STREAMRunner(Antagonist):
             if self.pattern == 'random':
                 workload_str += 'Random'
 
-            # if self.pattern == 'random':
-            #     args.append('-U')
+            if self.pattern == 'random' and 'chunk_size' in self.opts:
+                workload_str += ('Chunk' + str(self.opts['chunk_size']))
 
             args.append(workload_str)
             args.append(str(duration))
@@ -76,7 +78,7 @@ class STREAMRunner(Antagonist):
         self.hugepages = val
     
     def set_writefrac(self, val):
-        if not val in [0, 50]:
+        if not val in [0, 50, 100]:
             raise Exception('Write fraction not supported')
 
         self.write_frac = val

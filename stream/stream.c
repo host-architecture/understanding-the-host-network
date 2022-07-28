@@ -278,11 +278,354 @@ double STREAM_Read64_Random(uint64_t *read_checksum) {
 	int j;
 	__m512i sum = _mm512_set_epi32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	uint64_t x = 432437644;
-	//srand(x);
+	// srand(x);
 	for (j=0; j<READ64_ARRAY_COUNT; j++) {
 		__m512i mm_a = _mm512_load_si512(&a[8*(x & (READ64_ARRAY_COUNT - 1))]);
 		//printf("[ADDR] %x\n", 8*8*(x & (READ64_ARRAY_COUNT - 1)));
 		sum = _mm512_add_epi32(sum, mm_a);
+		x ^= x << 13;
+		x ^= x >> 7;
+		x ^= x << 17;
+		// x ^= x >> 12;
+		// x ^= x << 25;
+		// x ^= x >> 27;
+	}
+
+	int chx0, chx1, chx2, chx3;
+	__m128i chx;
+	chx = _mm512_extracti32x4_epi32(sum, 0);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 1);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 2);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 3);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+}
+
+#define READ64_ARRAY_COUNT_CHUNK2 (READ64_ARRAY_COUNT/2)
+
+double STREAM_Read64_Random_Chunk2(uint64_t *read_checksum) {
+	int j, k;
+	__m512i sum = _mm512_set_epi32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	uint64_t x = 432437644;
+	// srand(x);
+	for (j=0; j<READ64_ARRAY_COUNT_CHUNK2; j++) {
+		for(k = 0; k < 2; k++) {
+			__m512i mm_a = _mm512_load_si512(&a[2*8*(x & (READ64_ARRAY_COUNT_CHUNK2 - 1)) + 8*k]);
+			sum = _mm512_add_epi32(sum, mm_a);
+		}
+		x ^= x << 13;
+		x ^= x >> 7;
+		x ^= x << 17;
+		// x ^= x >> 12;
+		// x ^= x << 25;
+		// x ^= x >> 27;
+	}
+
+	int chx0, chx1, chx2, chx3;
+	__m128i chx;
+	chx = _mm512_extracti32x4_epi32(sum, 0);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 1);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 2);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 3);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+}
+
+#define READ64_ARRAY_COUNT_CHUNK4 (READ64_ARRAY_COUNT/4)
+
+double STREAM_Read64_Random_Chunk4(uint64_t *read_checksum) {
+	int j, k;
+	__m512i sum = _mm512_set_epi32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	uint64_t x = 432437644;
+	// srand(x);
+	for (j=0; j<READ64_ARRAY_COUNT_CHUNK4; j++) {
+		for(k = 0; k < 4; k++) {
+			__m512i mm_a = _mm512_load_si512(&a[4*8*(x & (READ64_ARRAY_COUNT_CHUNK4 - 1)) + 8*k]);
+			sum = _mm512_add_epi32(sum, mm_a);
+		}
+		x ^= x << 13;
+		x ^= x >> 7;
+		x ^= x << 17;
+		// x ^= x >> 12;
+		// x ^= x << 25;
+		// x ^= x >> 27;
+	}
+
+	int chx0, chx1, chx2, chx3;
+	__m128i chx;
+	chx = _mm512_extracti32x4_epi32(sum, 0);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 1);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 2);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 3);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+}
+
+#define READ64_ARRAY_COUNT_CHUNK8 (READ64_ARRAY_COUNT/8)
+
+double STREAM_Read64_Random_Chunk8(uint64_t *read_checksum) {
+	int j, k;
+	__m512i sum = _mm512_set_epi32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	uint64_t x = 432437644;
+	// srand(x);
+	for (j=0; j<READ64_ARRAY_COUNT_CHUNK8; j++) {
+		for(k = 0; k < 8; k++) {
+			__m512i mm_a = _mm512_load_si512(&a[8*8*(x & (READ64_ARRAY_COUNT_CHUNK8 - 1)) + 8*k]);
+			sum = _mm512_add_epi32(sum, mm_a);
+		}
+		x ^= x << 13;
+		x ^= x >> 7;
+		x ^= x << 17;
+		// x ^= x >> 12;
+		// x ^= x << 25;
+		// x ^= x >> 27;
+	}
+
+	int chx0, chx1, chx2, chx3;
+	__m128i chx;
+	chx = _mm512_extracti32x4_epi32(sum, 0);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 1);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 2);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 3);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+}
+
+#define READ64_ARRAY_COUNT_CHUNK16 (READ64_ARRAY_COUNT/16)
+
+double STREAM_Read64_Random_Chunk16(uint64_t *read_checksum) {
+	int j, k;
+	__m512i sum = _mm512_set_epi32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	uint64_t x = 432437644;
+	// srand(x);
+	for (j=0; j<READ64_ARRAY_COUNT_CHUNK16; j++) {
+		for(k = 0; k < 16; k++) {
+			__m512i mm_a = _mm512_load_si512(&a[16*8*(x & (READ64_ARRAY_COUNT_CHUNK16 - 1)) + 8*k]);
+			sum = _mm512_add_epi32(sum, mm_a);
+		}
+		x ^= x << 13;
+		x ^= x >> 7;
+		x ^= x << 17;
+		// x ^= x >> 12;
+		// x ^= x << 25;
+		// x ^= x >> 27;
+	}
+
+	int chx0, chx1, chx2, chx3;
+	__m128i chx;
+	chx = _mm512_extracti32x4_epi32(sum, 0);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 1);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 2);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 3);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+}
+
+#define READ64_ARRAY_COUNT_CHUNK32 (READ64_ARRAY_COUNT/32)
+
+double STREAM_Read64_Random_Chunk32(uint64_t *read_checksum) {
+	int j, k;
+	__m512i sum = _mm512_set_epi32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	uint64_t x = 432437644;
+	// srand(x);
+	for (j=0; j<READ64_ARRAY_COUNT_CHUNK32; j++) {
+		for(k = 0; k < 32; k++) {
+			__m512i mm_a = _mm512_load_si512(&a[32*8*(x & (READ64_ARRAY_COUNT_CHUNK32 - 1)) + 8*k]);
+			sum = _mm512_add_epi32(sum, mm_a);
+		}
+		x ^= x << 13;
+		x ^= x >> 7;
+		x ^= x << 17;
+		// x ^= x >> 12;
+		// x ^= x << 25;
+		// x ^= x >> 27;
+	}
+
+	int chx0, chx1, chx2, chx3;
+	__m128i chx;
+	chx = _mm512_extracti32x4_epi32(sum, 0);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 1);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 2);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 3);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+}
+
+#define READ64_ARRAY_COUNT_CHUNK64 (READ64_ARRAY_COUNT/64)
+
+double STREAM_Read64_Random_Chunk64(uint64_t *read_checksum) {
+	int j, k;
+	__m512i sum = _mm512_set_epi32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	uint64_t x = 432437644;
+	// srand(x);
+	for (j=0; j<READ64_ARRAY_COUNT_CHUNK64; j++) {
+		for(k = 0; k < 64; k++) {
+			__m512i mm_a = _mm512_load_si512(&a[64*8*(x & (READ64_ARRAY_COUNT_CHUNK64 - 1)) + 8*k]);
+			sum = _mm512_add_epi32(sum, mm_a);
+		}
+		x ^= x << 13;
+		x ^= x >> 7;
+		x ^= x << 17;
+		// x ^= x >> 12;
+		// x ^= x << 25;
+		// x ^= x >> 27;
+	}
+
+	int chx0, chx1, chx2, chx3;
+	__m128i chx;
+	chx = _mm512_extracti32x4_epi32(sum, 0);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 1);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 2);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	chx = _mm512_extracti32x4_epi32(sum, 3);
+	chx0 = _mm_extract_epi32(chx, 0);
+	chx1 = _mm_extract_epi32(chx, 1);
+	chx2 = _mm_extract_epi32(chx, 2);
+	chx3 = _mm_extract_epi32(chx, 3);
+	*read_checksum += chx0 + chx1 + chx2 + chx3;
+	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+}
+
+#define READ64_ARRAY_COUNT_CHUNK128 (READ64_ARRAY_COUNT/128)
+
+double STREAM_Read64_Random_Chunk128(uint64_t *read_checksum) {
+	int j, k;
+	__m512i sum = _mm512_set_epi32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	uint64_t x = 432437644;
+	// srand(x);
+	for (j=0; j<READ64_ARRAY_COUNT_CHUNK128; j++) {
+		for(k = 0; k < 128; k++) {
+			__m512i mm_a = _mm512_load_si512(&a[128*8*(x & (READ64_ARRAY_COUNT_CHUNK128 - 1)) + 8*k]);
+			sum = _mm512_add_epi32(sum, mm_a);
+		}
 		x ^= x << 13;
 		x ^= x >> 7;
 		x ^= x << 17;
@@ -363,6 +706,30 @@ double STREAM_ReadWrite64(uint64_t *read_checksum) {
 	return (2*STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
 }
 
+double STREAM_NtWrite64(uint64_t *read_checksum) {
+	int j;
+	__m512i val = _mm512_set_epi32(1995, 1995, 2002, 2002, 1995, 1995, 2002, 2002, 1995, 1995, 2002, 2002, 1995, 1995, 2002, 2002);
+	for (j=0; j<STREAM_ARRAY_SIZE; j += 8) {
+		_mm512_stream_si512(&a[j], val);
+	}
+
+	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+}
+
+
+double STREAM_NtWrite64_Random(uint64_t *read_checksum) {
+	int j;
+	__m512i val = _mm512_set_epi32(1995, 1995, 2002, 2002, 1995, 1995, 2002, 2002, 1995, 1995, 2002, 2002, 1995, 1995, 2002, 2002);
+	uint64_t x = 432437644;
+	for (j=0; j<STREAM_ARRAY_SIZE; j += 8) {
+		_mm512_stream_si512(&a[8*(x & (READ64_ARRAY_COUNT - 1))], val);
+		x ^= x << 13;
+		x ^= x >> 7;
+		x ^= x << 17;
+	}
+
+	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+}
 
 
 int
@@ -522,6 +889,24 @@ main(int argc, char **argv)
 		execute = &STREAM_Write64;
 	} else if(strcmp(workload, "Read64Random") == 0){
 		execute = &STREAM_Read64_Random;
+	} else if(strcmp(workload, "Read64RandomChunk16") == 0){
+		execute = &STREAM_Read64_Random_Chunk16;
+	} else if(strcmp(workload, "Read64RandomChunk32") == 0){
+		execute = &STREAM_Read64_Random_Chunk32;
+	} else if(strcmp(workload, "Read64RandomChunk64") == 0){
+		execute = &STREAM_Read64_Random_Chunk64;
+	} else if(strcmp(workload, "Read64RandomChunk128") == 0){
+		execute = &STREAM_Read64_Random_Chunk128;
+	} else if(strcmp(workload, "Read64RandomChunk8") == 0){
+		execute = &STREAM_Read64_Random_Chunk8;
+	} else if(strcmp(workload, "Read64RandomChunk4") == 0){
+		execute = &STREAM_Read64_Random_Chunk4;
+	} else if(strcmp(workload, "Read64RandomChunk2") == 0){
+		execute = &STREAM_Read64_Random_Chunk2;
+	} else if(strcmp(workload, "NtWrite64") == 0) {
+		execute = &STREAM_NtWrite64;
+	} else if(strcmp(workload, "NtWrite64Random") == 0) {
+		execute = &STREAM_NtWrite64_Random;
 	} else {
 		printf("Unknown workload\n");
 		exit(-1);

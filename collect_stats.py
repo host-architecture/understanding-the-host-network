@@ -71,6 +71,10 @@ filepath= os.path.join(STATS_PATH, args.config + '.stream.txt')
 if len(glob.glob(filepath + '-core*')) > 0:
     ss.load_stream(filepath)
 
+filepath= os.path.join(STATS_PATH, args.config + '.stream2.txt')
+if len(glob.glob(filepath + '-core*')) > 0:
+    ss.load_stream(filepath, label='stream2_xput')
+
 filepath= os.path.join(STATS_PATH, args.config + '.mlc.txt')
 if os.path.isfile(filepath):
     ss.load_mlc(filepath)
@@ -99,6 +103,6 @@ for col in cols:
     elif metric_type == 'imc':
         metric_filter = filter_channels
 
-    res.append(ss.query(metric, agg_space=metric_agg, agg_time=args.agg_time, filter=metric_filter))
+    res += ss.query(metric, agg_space=metric_agg, agg_time=args.agg_time, filter=metric_filter)
 
 print(' '.join([str(x) for x in res]))

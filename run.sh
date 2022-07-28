@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for i in {1..5}; do sudo python3 -m mio statstest-write0-gran2-run$i --ant_num_cores 8 --ant_mem_numa 3 --ant stream --ant_writefrac 0 --ant_inst_size 64 --disable_prefetch --ant_duration 60 --stats_single --stats_single_duration 5 --stats_single_gran 2; done;
+for i in {1..5}; do sudo python3 -m mio statstest-write0-gran1-run$i --ant_num_cores 8 --ant_mem_numa 3 --ant stream --ant_writefrac 0 --ant_inst_size 64 --disable_prefetch --ant_duration 60 --stats_single --stats_single_duration 5 --stats_single_gran 1; done;
+for i in {1..5}; do sudo python3 -m mio statstest-write0-gran0.5-run$i --ant_num_cores 8 --ant_mem_numa 3 --ant stream --ant_writefrac 0 --ant_inst_size 64 --disable_prefetch --ant_duration 60 --stats_single --stats_single_duration 5 --stats_single_gran 0.5; done;
+for i in {1..5}; do sudo python3 -m mio statstest-write0-gran0.1-run$i --ant_num_cores 8 --ant_mem_numa 3 --ant stream --ant_writefrac 0 --ant_inst_size 64 --disable_prefetch --ant_duration 60 --stats_single --stats_single_duration 5 --stats_single_gran 0.1; done;
+for i in {1..5}; do sudo python3 -m mio statstest-write0-gran0.05-run$i --ant_num_cores 8 --ant_mem_numa 3 --ant stream --ant_writefrac 0 --ant_inst_size 64 --disable_prefetch --ant_duration 60 --stats_single --stats_single_duration 5 --stats_single_gran 0.05; done;
+for i in {1..5}; do sudo python3 -m mio statstest-write0-gran0.015-run$i --ant_num_cores 8 --ant_mem_numa 3 --ant stream --ant_writefrac 0 --ant_inst_size 64 --disable_prefetch --ant_duration 60 --stats_single --stats_single_duration 5 --stats_single_gran 0.015; done;

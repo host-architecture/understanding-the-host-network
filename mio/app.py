@@ -77,7 +77,11 @@ def run_benchmark(args, env):
         else:
             raise Exception('Unknown antagonist')
 
-        ant.init(os.path.join(env.get_stats_path(), '%s-cores%d.%s.txt'%(prefix, num_cores, args.ant)), cores, mem_numa, {})
+        ant_opts = {}
+        if args.ant_chunksize:
+            ant_opts['chunk_size'] = args.ant_chunksize
+
+        ant.init(os.path.join(env.get_stats_path(), '%s-cores%d.%s.txt'%(prefix, num_cores, args.ant)), cores, mem_numa, ant_opts)
         if args.ant_inst_size:
             ant.set_instsize(args.ant_inst_size)
         if args.ant_pattern:
@@ -92,6 +96,7 @@ def run_benchmark(args, env):
     ant2 = None
     if args.ant2:
         cores2 = [int(x) for x in args.ant2_cpus.split(',')]
+        cores2 = cores2[:args.ant2_num_cores]
 
         if args.ant2 == 'mlc':
             ant2 = MLCRunner(env.get_mlc_path())
@@ -107,6 +112,8 @@ def run_benchmark(args, env):
             ant2.set_pattern(args.ant2_pattern)
         if args.ant2_writefrac:
             ant2.set_writefrac(args.ant2_writefrac)
+        if args.ant2_hugepages:
+            ant2.set_hugepages(True)
 
         ant2.run(args.ant2_duration)
 
@@ -141,6 +148,18 @@ def run_benchmark(args, env):
         pcm_mem = PcmMemoryRunner(env.get_pcm_path())
         time.sleep(WARMUP_DURATION)
         pcm_mem.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-memory.txt'%(prefix, num_cores)), RECORD_DURATION)
+    elif args.stats_single:
+        # pcm_raw = PcmRawRunner(env.get_pcm_path())
+        time.sleep(WARMUP_DURATION)
+        # pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-imc.txt'%(prefix, num_cores)), events_group_3, args.stats_single_duration, granularity=args.stats_single_gran)
+        #pcm_latency = PcmLatencyRunner(env.get_pcm_path())
+        #pcm_latency.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-latency.txt'%(prefix, num_cores)), args.stats_single_duration)
+#        pcm_mem = PcmMemoryRunner(env.get_pcm_path())
+ #       pcm_mem.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-memory.txt'%(prefix, num_cores)), args.stats_single_duration)
+        pcm_raw = PcmRawRunner(env.get_pcm_path())
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-pre.txt'%(prefix, num_cores)), events_group_6, args.stats_single_duration)
+
+
 
 
     if args.fio:
@@ -176,6 +195,7 @@ def main(argv=[]):
     parser.add_argument('--ant_numa_order', help='Order of NUMA nodes to use for antagonist', default='0,1,2,3')
     parser.add_argument('--ant_inst_size', help='Instruction size for antagonist', type=int)
     parser.add_argument('--ant_pattern', help='Antagonist access pattern')
+    parser.add_argument('--ant_chunksize', help='Antagonist chunk size for random access pattern', type=int)
     parser.add_argument('--ant_writefrac', help='Antagonist write fraction (percentage)', type=int)
     parser.add_argument('--ant_duration', help='Antagonist run duration', type=int, default=40)
     parser.add_argument('--ant_hugepages', help='Enable hugepages', action='store_true')
@@ -194,12 +214,17 @@ def main(argv=[]):
     parser.add_argument('--fio_rate', help='what it says', type=int)
     parser.add_argument('--ant2', help='What antagonist to use (mlc/stream)')
     parser.add_argument('--ant2_cpus', help='List of cores to run antagonist on', default='3')
+    parser.add_argument('--ant2_num_cores', help='Number of cores to run antagonist on', type=int, default=1)
     parser.add_argument('--ant2_mem_numa', help='Number of cores to run antagonist on', type=int, default=0)
     parser.add_argument('--ant2_inst_size', help='Instruction size for antagonist', type=int)
     parser.add_argument('--ant2_pattern', help='Antagonist access pattern')
     parser.add_argument('--ant2_writefrac', help='Antagonist write fraction (percentage)', type=int)
     parser.add_argument('--ant2_duration', help='Antagonist run duration', type=int, default=40)
+    parser.add_argument('--ant2_hugepages', help='Enable hugepages', action='store_true')
     parser.add_argument('--notouch_prefetch', help='Do not modify prefetchers', action='store_true')
+    parser.add_argument('--stats_single', help='Record single statistic', action='store_true')
+    parser.add_argument('--stats_single_duration', help='Record stats duration', type=int, default=5)
+    parser.add_argument('--stats_single_gran', help='Record stats granularity', type=float, default=1.0)
 
 
     args = parser.parse_args(argv[1:])
