@@ -10,6 +10,8 @@ class Environment:
         self.mlc_path = None
         self.pcm_path = None
         self.stats_path = None
+        self.fio_path = None
+        self.stream_path = None
 
         if 'MLC_PATH' in config_dict:
             self.mlc_path = config_dict['MLC_PATH']
@@ -20,9 +22,15 @@ class Environment:
         if 'STATS_PATH' in config_dict:
             self.stats_path = config_dict['STATS_PATH']
 
+        if 'FIO_PATH' in config_dict:
+            self.fio_path = config_dict['FIO_PATH']
+
+        if 'STREAM_PATH' in config_dict:
+            self.stream_path = config_dict['STREAM_PATH']
+
         # Get cpu topology
         # TODO: Make this generic
-        self.numa_cores = [[0,4,8,12,16,20,24,28], [1,5,9,13,17,21,25,29], [2,6,10,14,18,22,26,30], [3,7,11,15,19,23,27,31]]
+        self.numa_cores = [[3,7,11,15,19,23,27,31], [0,4,8,12,16,20,24,28], [1,5,9,13,17,21,25,29], [2,6,10,14,18,22,26,30]]
 
         if os.system('modprobe msr') != 0:
             raise Exception('Failed to load msr kernel module')
@@ -43,6 +51,16 @@ class Environment:
             raise Exception('Stats Path not specified')
         return self.stats_path
 
+    def get_fio_path(self):
+        if not self.fio_path:
+            raise Exception('FIO Path not specified')
+        return self.fio_path
+
+    def get_stream_path(self):
+        if not self.stream_path:
+            raise Exception('STREAM Path not specified')
+        return self.stream_path
+
     def enable_prefetch(self):
         if os.system('wrmsr -a 0x1a4 0') != 0:
             raise Exception('Enable prefetch failed')
@@ -50,6 +68,10 @@ class Environment:
     def disable_prefetch(self):
         if os.system('wrmsr -a 0x1a4 15') != 0:
             raise Exception('Disable prefetch failed')
+    
+    def disable_prefetch_l1(self):
+        if os.system('wrmsr -a 0x1a4 12') != 0:
+            raise Exception('Disable L1 prefetch failed')
 
     def enable_hugepages(self):
         for i in range(self.get_num_numa()):
