@@ -1,5 +1,8 @@
 import os, sys, re, subprocess, glob
 
+MAX_SSDS = 6
+FIO_STATS_PATH = '/home/midhul/membw-eval'
+
 class StatStore:
     def __init__(self):
         self.d = {}
@@ -21,7 +24,14 @@ class StatStore:
             'estimated_qd': (lambda x,y,z,w: x + y + z + w, ['switching_delay', 'write_hol', 'row_miss_penalty', 'remainder']),
             'actual_qd': (lambda x: max(x - 71.3, 0), ['l1_miss_latency']),
             'estimated_latency': (lambda x: 71.3 + x, ['estimated_qd']),
-            'read_activations': (lambda x, y: x + y, ['acts_read', 'acts_byp'])
+            'read_activations': (lambda x, y: x + y, ['acts_read', 'acts_byp']),
+            'cha_miss_latency': (lambda x, y, z: 1e9*(x/y)/z, ['tor_drd_miss_occ_agg', 'unc_clk', 'tor_drd_miss_inserts']),
+            'irp_write_latency': (lambda x, y, z: 1e9*(x/(z+0.000000005))/(y+0.000000005), ['irp_write_occupancy', 'write_inserts_pcitom', 'irp_cycles']),
+            'io_xput': (lambda x: x/8.0, ['fio_xput']),
+            'lines_read': (lambda x: (x - 228.5)*1e6/64, ['memreadbw']),
+            'pre_conflict_read': (lambda x, y, z: (x*z)/(x+y), ['pre_miss', 'pre_close', 'pre_rd']),
+            'acts_read_total': (lambda x, y: x + 4, ['acts_read', 'acts_byp']),
+            'lines_written': (lambda x: x*1e6/64, ['memwritebw'])
         }
 
     def load_pcm_raw(self, filepath):
@@ -130,7 +140,10 @@ class StatStore:
                 self.d['mlc_xput']['ALL'] = [float(cols[2])]
 
     def load_fio(self, config, io_size):
-        self.d['fio_xput'] = {'ALL': [float(subprocess.check_output(['./collect_fio.sh', config, str(io_size)]))]}
+        self.d['fio_xput'] = {}
+        for i in range(MAX_SSDS):
+            if os.path.exists(os.path.join(FIO_STATS_PATH, '%s.fio%d.txt'%(config, i))):
+                self.d['fio_xput']['SSD%d'%(i)] = [float(subprocess.check_output(['./collect_fio.sh', config, str(io_size), str(i)]))]
 
     def compute_metric(self, metric):
         if not metric in self.derived_metrics:

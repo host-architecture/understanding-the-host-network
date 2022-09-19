@@ -51,6 +51,7 @@
  #define _GNU_SOURCE
 #include <sys/mman.h>
 #include <immintrin.h>
+#include <fcntl.h>
 
 #define MAP_HUGE_1GB (30 << MAP_HUGE_SHIFT)
 
@@ -756,6 +757,18 @@ main(int argc, char **argv)
 	//	c = mmap(0, STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_HUGETLB | MAP_ANONYMOUS | MAP_HUGE_1GB, -1, 0);
 		if(c == MAP_FAILED) {
 			printf("mmap hugepages failed for c\n");
+			exit(-1);
+		}
+	} else if(getenv("STREAM_WC") != NULL) {
+		int configfd;
+		configfd = open("/sys/kernel/debug/miomap", O_RDWR);
+		if(configfd < 0) {
+			perror("open");
+			exit(-1);
+		}
+		a = mmap(NULL, STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE), PROT_READ|PROT_WRITE, MAP_SHARED, configfd, 0);
+		if(a == MAP_FAILED) {
+			printf("mmap writecombined failed for a\n");
 			exit(-1);
 		}
 	} else {

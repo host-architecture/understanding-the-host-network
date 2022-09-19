@@ -16,12 +16,15 @@ FIO_PRESTART_DURATION = 5
 events_group_0 = {'lfb_occ_agg': 'core/config=0x0000000000430148', 'lfb_cycles': 'core/config=0x0000000001430148', 'lfb_l1_misses': 'core/config=0x00000000004308d1', 'lfb_full': 'core/config=0x0000000000430248'}
 events_group_1 = {'load_l1_hits': 'core/config=0x00000000004301d1', 'load_l1_misses': 'core/config=0x00000000004308d1', 'load_l1_fbhit': 'core/config=0x00000000004340d1', 'loads': 'core/config=0x00000000004381d0'}
 events_group_2 = {'load_l2_hits': 'core/config=0x00000000004302d1', 'load_l2_misses': 'core/config=0x00000000004310d1', 'load_l3_hits': 'core/config=0x00000000004304d1', 'load_l3_misses': 'core/config=0x00000000004320d1'}
-events_group_3 = {'rpq_occ_agg': 'imc/config=0x0000000000400080', 'rpq_ne_cycles': 'imc/config=0x0000000000400011', 'acts_byp': 'imc/config=0x000000000040801', 'acts_read': 'imc/config=0x000000000040101'}
-events_group_4 = {'rmm': 'imc/config=0x0000000000400107', 'wmm': 'imc/config=0x0000000000400207', 'wmm_to_rmm': 'imc/config=0x0000000000407c0', 'acts_write': 'imc/config=0x000000000040201'}
-events_group_5 = {'wr_wmm': 'imc/config=0x0000000000400404', 'wr_rmm': 'imc/config=0x0000000000400804', 'wr_cas': 'imc/config=0x000000000040c04', 'cas_all': 'imc/config=0x000000000040f04'}
+events_group_3 = {'rpq_occ_agg': 'imc/config=0x0000000000400080', 'rpq_full_cycles': 'imc/config=0x0000000000400012', 'acts_byp': 'imc/config=0x000000000040801', 'acts_read': 'imc/config=0x000000000040101'}
+events_group_4 = {'wmm_to_rmm_starve': 'imc/config=0x0000000000402c0', 'wmm': 'imc/config=0x0000000000400207', 'wmm_to_rmm': 'imc/config=0x0000000000407c0', 'acts_write': 'imc/config=0x000000000040201'}
+events_group_5 = {'wr_wmm': 'imc/config=0x0000000000400404', 'wr_rmm': 'imc/config=0x0000000000400804', 'rd_wmm': 'imc/config=0x000000000041004', 'rd_rmm': 'imc/config=0x000000000042004'}
 events_group_6 = {'pre_miss': 'imc/config=0x000000000040102', 'pre_close': 'imc/config=0x000000000040202', 'pre_rd': 'imc/config=0x000000000040402', 'pre_wr': 'imc/config=0x000000000040802'}
+events_group_7 = {'tor_drd_miss_occ_agg': 'cha/config=0x0000000000402536,config2=0x40433', 'tor_drd_miss_inserts': 'cha/config=0x0000000000402535,config2=0x40433', 'unc_clk': 'cha/config=0x0000000000400000'}
+events_group_8 = {'write_inserts_pcitom': 'irp/config=0x0000000000401010', 'irp_write_occupancy': 'irp/config=0x000000000040040f'}
+events_group_9 = {'irp_cycles': 'irp/config=0x0000000000400001'}
 
-SSD = ['/dev/nvme0n1', '/dev/nvme3n1', '/dev/nvme5n1', '/dev/nvme7n1', '/dev/nvme1n1', '/dev/nvme8n1']
+SSD = ['/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1', '/dev/nvme6n1', '/dev/nvme7n1', '/dev/nvme8n1']
 
 def expand_ranges(x):
     result = []
@@ -123,7 +126,8 @@ def run_benchmark(args, env):
             time.sleep(WARMUP_DURATION)
         for i in range(args.fio_num_ssds):
             fio = FIORunner(env.get_fio_path())
-            fio.init(os.path.join(env.get_stats_path(), '%s-cores%d.fio%d.txt'%(prefix, num_cores, i)), args.fio_cpus, args.fio_mem_numa, args.fio_iosize, args.fio_iodepth, args.fio_writefrac, SSD[i])
+            fio_core_list = [int(y) for y in args.fio_cpus.split(',')]
+            fio.init(os.path.join(env.get_stats_path(), '%s-cores%d.fio%d.txt'%(prefix, num_cores, i)), [fio_core_list[i % len(fio_core_list)]], args.fio_mem_numa, args.fio_iosize, args.fio_iodepth, args.fio_writefrac, SSD[i])
             if args.fio_rate:
                 print('Setting fio rate cap')
                 fio.set_ratecap(args.fio_rate)
@@ -138,12 +142,15 @@ def run_benchmark(args, env):
         pcm_latency.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-latency.txt'%(prefix, num_cores)), RECORD_DURATION)
         pcm_raw = PcmRawRunner(env.get_pcm_path())
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-lfb.txt'%(prefix, num_cores)), events_group_0, RECORD_DURATION)
-        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l1.txt'%(prefix, num_cores)), events_group_1, RECORD_DURATION)
-        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l2l3.txt'%(prefix, num_cores)), events_group_2, RECORD_DURATION)
+        # pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha.txt'%(prefix, num_cores)), events_group_7, RECORD_DURATION)
+        # pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l1.txt'%(prefix, num_cores)), events_group_1, RECORD_DURATION)
+        # pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l2l3.txt'%(prefix, num_cores)), events_group_2, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-imc.txt'%(prefix, num_cores)), events_group_3, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-modes.txt'%(prefix, num_cores)), events_group_4, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cas.txt'%(prefix, num_cores)), events_group_5, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-pre.txt'%(prefix, num_cores)), events_group_6, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-irp.txt'%(prefix, num_cores)), events_group_8, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-irp2.txt'%(prefix, num_cores)), events_group_9, RECORD_DURATION)
     elif args.stats_membw:
         pcm_mem = PcmMemoryRunner(env.get_pcm_path())
         time.sleep(WARMUP_DURATION)

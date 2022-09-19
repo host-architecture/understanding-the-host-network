@@ -3,7 +3,7 @@ import os
 
 class PcmRawRunner:
     def __init__(self, pcm_path):
-        self.pcm_raw_path = os.path.join(pcm_path, 'pcm-raw.x')
+        self.pcm_raw_path = os.path.join(pcm_path, 'pcm-raw')
 
         self.proc = None
 
@@ -30,7 +30,7 @@ class PcmRawRunner:
 
 class PcmMemoryRunner:
     def __init__(self, pcm_path):
-        self.pcm_memory_path = os.path.join(pcm_path, 'pcm-memory.x')
+        self.pcm_memory_path = os.path.join(pcm_path, 'pcm-memory')
 
         self.proc = None
 
@@ -52,7 +52,7 @@ class PcmMemoryRunner:
 
 class PcmLatencyRunner:
     def __init__(self, pcm_path):
-        self.pcm_latency_path = os.path.join(pcm_path, 'pcm-latency.x')
+        self.pcm_latency_path = os.path.join(pcm_path, 'pcm-latency')
 
         self.proc = None
 
