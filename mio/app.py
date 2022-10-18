@@ -24,7 +24,7 @@ events_group_7 = {'tor_drd_miss_occ_agg': 'cha/config=0x0000000000402536,config2
 events_group_8 = {'write_inserts_pcitom': 'irp/config=0x0000000000401010', 'irp_write_occupancy': 'irp/config=0x000000000040040f'}
 events_group_9 = {'irp_cycles': 'irp/config=0x0000000000400001'}
 
-SSD = ['/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1', '/dev/nvme6n1', '/dev/nvme7n1', '/dev/nvme8n1']
+SSD = ['/dev/nvme0n1', '/dev/nvme1n1', '/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1']
 
 def expand_ranges(x):
     result = []
