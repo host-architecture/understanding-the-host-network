@@ -232,6 +232,12 @@ def main(argv=[]):
     parser.add_argument('--stats_single', help='Record single statistic', action='store_true')
     parser.add_argument('--stats_single_duration', help='Record stats duration', type=int, default=5)
     parser.add_argument('--stats_single_gran', help='Record stats granularity', type=float, default=1.0)
+    parser.add_argument('--mmapbench', help='Run mmapbench', action='store_true')
+    parser.add_argument('--mmapbench_mem_numa', help='what it says', type=int, default=0)
+    parser.add_argument('--mmapbench_cpus', help='List of CPUs to run fio on', default='3')
+    parser.add_argument('--mmapbench_writefrac', help='what it says', type=int, default=0)
+    parser.add_argument('--mmapbench_num_ssds', help='what it says', type=int, default=1)
+    parser.add_argument('--mmapbench_duration', help='what it says', type=int, default=10)
 
 
     args = parser.parse_args(argv[1:])
