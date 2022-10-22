@@ -1,3 +1,5 @@
+from mio.mmapbench import MmapBenchRunner
+from mio.sar import SarRunner
 from .env import *
 from .mlc import *
 from .pcm import *
@@ -24,7 +26,10 @@ events_group_7 = {'tor_drd_miss_occ_agg': 'cha/config=0x0000000000402536,config2
 events_group_8 = {'write_inserts_pcitom': 'irp/config=0x0000000000401010', 'irp_write_occupancy': 'irp/config=0x000000000040040f'}
 events_group_9 = {'irp_cycles': 'irp/config=0x0000000000400001'}
 
-SSD = ['/dev/nvme0n1', '/dev/nvme1n1', '/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1']
+# SSD = ['/dev/nvme0n1', '/dev/nvme1n1', '/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1']
+# sdb, sdc, sde, sdh, sdi, sdj, sdk
+SSD = ['/dev/sdc', '/dev/sde', '/dev/sdi', '/dev/sdj', '/dev/sdb', '/dev/sdh', '/dev/sdk']
+SSD_MNTS = ['/mnt/sdc1', '/mnt/sde1', '/mnt/sdi1', '/mnt/sdj1', '/mnt/sdb1', '/mnt/sdh1', '/mnt/sdk1']
 
 def expand_ranges(x):
     result = []
@@ -50,6 +55,8 @@ def run_benchmark(args, env):
 
     if args.fio and args.stats_membw and args.fio_duration < WARMUP_DURATION + RECORD_DURATION:
         raise Exception('FIO Duration too small for measuring stats')
+
+    os.system('rm ' + os.path.join(env.get_stats_path(), '%s.*'%(prefix)))
 
     print('Running %s-cores%d'%(prefix, num_cores))
 
@@ -134,6 +141,35 @@ def run_benchmark(args, env):
             fio.run(args.fio_duration)
             fios.append(fio)
 
+    mmapbench = None
+    if args.mmapbench:
+        if args.ant:
+            time.sleep(FIO_PRESTART_DURATION)
+        mmapbench = MmapBenchRunner(env.get_mmapbench_path())
+        mmapbench_cores_str = args.mmapbench_cpus
+        mmapbench_cores = None
+        if 'NUMA' in mmapbench_cores_str:
+            numa_node = int(mmapbench_cores_str[4:])
+            mmapbench_cores = env.get_cores_in_numa(numa_node)
+        else:
+            mmapbench_cores = [int(y) for y in args.mmapbench_cpus.split(',')]
+        mmapbench_cores = mmapbench_cores[:args.mmapbench_num_cores]
+        mmapbench_ssds = SSD_MNTS[:args.mmapbench_num_ssds]
+
+        mmapbench_opts = {}
+        if args.mmapbench_cg_per_process:
+            mmapbench_opts['cg_per_process'] = True
+        mmapbench.init(os.path.join(env.get_stats_path(), '%s.mmapbench.txt'%(prefix)), mmapbench_cores, args.mmapbench_mem_numa, args.mmapbench_threads_per_core, mmapbench_ssds, args.mmapbench_areasize, args.mmapbench_pgcache_frac, mmapbench_opts)
+        if args.mmapbench_inst_size:
+            mmapbench.set_instsize(args.mmapbench_inst_size)
+        if args.mmapbench_pattern:
+            mmapbench.set_pattern(args.mmapbench_pattern)
+        if args.mmapbench_writefrac:
+            mmapbench.set_writefrac(args.mmapbench_writefrac)
+        mmapbench.run(args.mmapbench_duration)
+
+
+    # TODO: This needs cleanup
     if args.stats:    
         pcm_mem = PcmMemoryRunner(env.get_pcm_path())
         time.sleep(WARMUP_DURATION)
@@ -165,6 +201,11 @@ def run_benchmark(args, env):
  #       pcm_mem.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-memory.txt'%(prefix, num_cores)), args.stats_single_duration)
         pcm_raw = PcmRawRunner(env.get_pcm_path())
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-pre.txt'%(prefix, num_cores)), events_group_6, args.stats_single_duration)
+    elif args.stats_cpuutil:
+        time.sleep(WARMUP_DURATION)
+        sar = SarRunner()
+        sar.run(os.path.join(env.get_stats_path(), '%s.sar.txt'%(prefix)), RECORD_DURATION)
+
 
 
 
@@ -172,6 +213,9 @@ def run_benchmark(args, env):
     if args.fio:
         for fio in fios:
             fio.wait()
+
+    if mmapbench:
+        mmapbench.wait()
 
     if ant:
         ant.wait()
@@ -185,6 +229,8 @@ def cleanup():
     os.system('pkill -9 -f mlc')
     os.system('pkill -9 -f fio')
     os.system('pkill -9 -f stream')
+    os.system('pkill -9 -f mmapbench')
+    os.system('pkill -9 -f sar')
 
 
 
@@ -208,6 +254,7 @@ def main(argv=[]):
     parser.add_argument('--ant_hugepages', help='Enable hugepages', action='store_true')
     parser.add_argument('--stats', help='Record stats', action='store_true')
     parser.add_argument('--stats_membw', help='Record membw stats', action='store_true')
+    parser.add_argument('--stats_cpuutil', help='Record CPU utilization stats', action='store_true')
     parser.add_argument('--disable_prefetch', help='Disable prefetchers', action='store_true')
     parser.add_argument('--disable_prefetch_l1', help='Disable L1 prefetchers', action='store_true')
     parser.add_argument('--fio', help='Run fio', action='store_true')
@@ -234,10 +281,17 @@ def main(argv=[]):
     parser.add_argument('--stats_single_gran', help='Record stats granularity', type=float, default=1.0)
     parser.add_argument('--mmapbench', help='Run mmapbench', action='store_true')
     parser.add_argument('--mmapbench_mem_numa', help='what it says', type=int, default=0)
-    parser.add_argument('--mmapbench_cpus', help='List of CPUs to run fio on', default='3')
+    parser.add_argument('--mmapbench_cpus', help='List of CPUs to run fio on', default='NUMA1')
+    parser.add_argument('--mmapbench_num_cores', help='what it says', type=int, default=1)
     parser.add_argument('--mmapbench_writefrac', help='what it says', type=int, default=0)
     parser.add_argument('--mmapbench_num_ssds', help='what it says', type=int, default=1)
     parser.add_argument('--mmapbench_duration', help='what it says', type=int, default=10)
+    parser.add_argument('--mmapbench_areasize', help='what it says', type=int, default=10*1024*1024*1024)
+    parser.add_argument('--mmapbench_pgcache_frac', help='what it says', type=float, default=0.1)
+    parser.add_argument('--mmapbench_threads_per_core', help='what it says', type=int, default=1)
+    parser.add_argument('--mmapbench_inst_size', help='Instruction size for mmapbench', type=int)
+    parser.add_argument('--mmapbench_pattern', help='mmapbench access pattern')
+    parser.add_argument('--mmapbench_cg_per_process', help='One cgroup per process', action='store_true')
 
 
     args = parser.parse_args(argv[1:])

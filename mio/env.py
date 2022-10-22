@@ -12,6 +12,7 @@ class Environment:
         self.stats_path = None
         self.fio_path = None
         self.stream_path = None
+        self.mmapbench_path = None
 
         if 'MLC_PATH' in config_dict:
             self.mlc_path = config_dict['MLC_PATH']
@@ -27,6 +28,9 @@ class Environment:
 
         if 'STREAM_PATH' in config_dict:
             self.stream_path = config_dict['STREAM_PATH']
+        
+        if 'MMAPBENCH_PATH' in config_dict:
+            self.mmapbench_path = config_dict['MMAPBENCH_PATH']
 
         # Get cpu topology
         # TODO: Make this generic
@@ -60,6 +64,11 @@ class Environment:
         if not self.stream_path:
             raise Exception('STREAM Path not specified')
         return self.stream_path
+
+    def get_mmapbench_path(self):
+        if not self.mmapbench_path:
+            raise Exception('MMAPBENCH_PATH not specified')
+        return self.mmapbench_path
 
     def enable_prefetch(self):
         if os.system('wrmsr -a 0x1a4 0') != 0:

@@ -3,5 +3,6 @@
     "PCM_PATH": "/home/midhul/pcm/build/bin",
     "STATS_PATH": "/home/midhul/membw-eval",
     "FIO_PATH": "/home/midhul/fio",
-    "STREAM_PATH": "/home/midhul/mio/stream"
+    "STREAM_PATH": "/home/midhul/mio/stream",
+    "MMAPBENCH_PATH": "/home/midhul/mio/mmapbench"
 }
