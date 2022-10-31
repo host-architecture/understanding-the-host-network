@@ -73,11 +73,14 @@ def run_benchmark(args, env):
 
     if args.ant:
         cores = []
-        for numa_idx in numa_order:
-            cores += env.get_cores_in_numa(numa_idx)
+        if args.ant_cpus:
+            cores += [int(y) for y in args.ant_cpus.split(',')]
+        else:
+            for numa_idx in numa_order:
+                cores += env.get_cores_in_numa(numa_idx)
         if args.fio:
             fio_core_list = [int(y) for y in args.fio_cpus.split(',')]
-            cores = [x for x in cores if x not in fio_core_list]
+        cores = [x for x in cores if x not in fio_core_list]
         cores = cores[:num_cores]
 
         if args.ant == 'mlc':
@@ -243,6 +246,7 @@ def main(argv=[]):
     parser = argparse.ArgumentParser()
     parser.add_argument('config', help='Label for experiment')
     parser.add_argument('--ant', help='What antagonist to use (mlc/stream)')
+    parser.add_argument('--ant_cpus', help='List of CPUs to run antagonist on')
     parser.add_argument('--ant_num_cores', help='Number of cores to run antagonist on', default='1')
     parser.add_argument('--ant_mem_numa', help='Number of cores to run antagonist on', type=int, default=0)
     parser.add_argument('--ant_numa_order', help='Order of NUMA nodes to use for antagonist', default='0,1,2,3')
