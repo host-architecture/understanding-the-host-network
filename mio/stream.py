@@ -53,7 +53,13 @@ class STREAMRunner(Antagonist):
 
             if self.hugepages:
                 my_env['STREAM_HUGEPAGES'] = 'on'
-            
+
+            if 'warmup_duration' in self.opts:
+                my_env['WARMUP_DURATION'] = str(self.opts['warmup_duration'])
+
+            if 'cooldown_duration' in self.opts:
+                my_env['COOLDOWN_DURATION'] = str(self.opts['cooldown_duration'])
+
             self.procs.append(subprocess.Popen(args, stdout=out_f, stderr=subprocess.STDOUT, env=my_env))
 
     def wait(self):

@@ -9,6 +9,7 @@ class StatStore:
 
         self.derived_metrics = {
             'lfb_latency': (lambda x, y, z: 1e9*(x/y)/z, ['lfb_occ_agg', 'lfb_cycles', 'lfb_l1_misses']),
+            'l1_miss_latency_adj': (lambda x, y: 1e9*(x/y), ['fb_occupancy', 'lfb_l1_misses']),
             'lfb_occupancy': (lambda x, y: x/y, ['lfb_occ_agg', 'lfb_cycles']),
             'lfb_fillfrac': (lambda x, y: x/y, ['lfb_full', 'lfb_cycles']),
             'l1_missrate': (lambda x, y, z: (x+y)/z, ['load_l1_misses', 'load_l1_fbhit', 'loads']),
@@ -204,6 +205,22 @@ class StatStore:
                     if not space_unit in self.d['l1_miss_latency']:
                         self.d['l1_miss_latency'][space_unit] = []
                     self.d['l1_miss_latency'][space_unit].append(float(cols[i+1]))
+
+    def load_redis(self, filepath, label='redis_xput'):
+        stream_files = glob.glob(filepath + '-core*')
+        if not label in self.d:
+            self.d[label] = {}
+        for sfile in stream_files:
+            core_idx = int(re.match('.*-core(\d+)$', sfile)[1])
+            space_unit = 'CORE%d' % (core_idx)
+            if not space_unit in self.d[label]:
+                self.d[label][space_unit] = []
+            with open(sfile, 'r') as f:
+                for line in f:
+                    if not 'throughput summary:' in line:
+                        continue
+                    cols = line.split()
+                    self.d[label][space_unit].append(float(cols[2]))
             
 
     def query(self, metric, agg_space='avg', agg_time='avg', filter=None):

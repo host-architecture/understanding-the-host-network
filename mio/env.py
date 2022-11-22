@@ -12,6 +12,8 @@ class Environment:
         self.stats_path = None
         self.fio_path = None
         self.stream_path = None
+        self.redis_path = None
+        self.memtier_path = None
 
         if 'MLC_PATH' in config_dict:
             self.mlc_path = config_dict['MLC_PATH']
@@ -27,6 +29,12 @@ class Environment:
 
         if 'STREAM_PATH' in config_dict:
             self.stream_path = config_dict['STREAM_PATH']
+
+        if 'REDIS_PATH' in config_dict:
+            self.redis_path = config_dict['REDIS_PATH']
+
+        if 'MEMTIER_PATH' in config_dict:
+            self.memtier_path = config_dict['MEMTIER_PATH']
 
         # Get cpu topology
         # TODO: Make this generic
@@ -60,6 +68,16 @@ class Environment:
         if not self.stream_path:
             raise Exception('STREAM Path not specified')
         return self.stream_path
+
+    def get_redis_path(self):
+        if not self.redis_path:
+            raise Exception('Redis Path not specified')
+        return self.redis_path
+
+    def get_memtier_path(self):
+        if not self.memtier_path:
+            raise Exception('Memtier Path not specified')
+        return self.memtier_path
 
     def enable_prefetch(self):
         if os.system('wrmsr -a 0x1a4 0') != 0:

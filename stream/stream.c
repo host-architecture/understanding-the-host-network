@@ -786,7 +786,6 @@ main(int argc, char **argv)
 		}
 	}
 	
-
 	
 	printf("Allocated buffers\n");
 
@@ -879,6 +878,15 @@ main(int argc, char **argv)
     
     /*	--- MAIN LOOP --- repeat test cases NTIMES times --- */
 
+	int warmup_duration = 0;
+	int cooldown_duration = 0;
+	if(getenv("WARMUP_DURATION") != NULL) {
+		warmup_duration = atoi(getenv("WARMUP_DURATION"));
+	}
+	if(getenv("COOLDOWN_DURATION") != NULL) {
+		cooldown_duration = atoi(getenv("COOLDOWN_DURATION"));
+	}
+
 	if(argc != 3) {
 		printf("Invalid args. Usage: ./stream <workload> <duration-in-secs>\n");
 		exit(-1);
@@ -925,21 +933,36 @@ main(int argc, char **argv)
 		exit(-1);
 	}
 
+	uint64_t read_checksum = 0;
 	double start_tim = mysecond();
+	double cur_tim = start_tim;
+	// Warmup
+	while(cur_tim - start_tim < warmup_duration) {
+		(*execute)(&read_checksum);
+		cur_tim = mysecond();	
+	}
+
+	// Actual run
+	start_tim = mysecond();
 	double total_bytes = 0.0;
 	double actual_duration;
-	uint64_t read_checksum = 0;
 	while(1) {
 		
 		total_bytes += (*execute)(&read_checksum);
 
-		// printf("a[0]: %lf\n", a[0]);
-
-		double cur_tim = mysecond();
+		cur_tim = mysecond();
 		if(cur_tim - start_tim >= duration) {
 			actual_duration = cur_tim - start_tim;
 			break;
 		}
+	}
+
+	// Cooldown
+	start_tim = mysecond();
+	cur_tim = start_tim;
+	while(cur_tim - start_tim < cooldown_duration) {
+		(*execute)(&read_checksum);
+		cur_tim = mysecond();	
 	}
 
 	double arr_checksum = 0.0;

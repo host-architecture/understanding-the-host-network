@@ -98,6 +98,10 @@ filepath= os.path.join(STATS_PATH, args.config + '.fio*.txt')
 if len(glob.glob(filepath)) > 0:
     ss.load_fio(args.config, args.io_size)
 
+filepath= os.path.join(STATS_PATH, args.config + '.redis.txt')
+if len(glob.glob(filepath + '-core*')) > 0:
+    ss.load_redis(filepath)
+
 filter_cores = args.filter_core_list.split(',')
 filter_cores = filter_cores[:args.filter_num_cores]
 filter_cores = ['CORE' + x for x in filter_cores]
