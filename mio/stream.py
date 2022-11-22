@@ -45,6 +45,10 @@ class STREAMRunner(Antagonist):
 
             if self.pattern == 'random' and 'chunk_size' in self.opts:
                 workload_str += ('Chunk' + str(self.opts['chunk_size']))
+            
+            # TODO: Clean up
+            if self.pattern == 'triad':
+                workload_str = 'Triad'
 
             args.append(workload_str)
             args.append(str(duration))
@@ -76,7 +80,7 @@ class STREAMRunner(Antagonist):
         self.instsize = size
 
     def set_pattern(self, pattern):
-        if pattern not in ['sequential', 'random']:
+        if pattern not in ['sequential', 'random', 'triad']:
             raise Exception('Pattern not supported')
         self.pattern = pattern
     

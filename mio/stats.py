@@ -114,6 +114,26 @@ class StatStore:
 
                     self.d[metric][space_unit].append(float(cols[i].strip()))
 
+    def load_sar(self, filepath):
+        label = 'cpu_util'
+        if not label in self.d:
+            self.d[label] = {}
+        with open(filepath, 'r') as f:
+            for line in f:
+                cols = line.split()
+                if len(cols) < 1 or cols[0] != 'Average:':
+                    continue
+                if len(cols) < 2 or (not cols[1].isdigit()):
+                    continue
+                core_idx = int(cols[1])
+                cpu_used = float(cols[2]) + float(cols[4])
+
+                space_unit = 'CORE%d' % (core_idx)
+                if not space_unit in self.d[label]:
+                    self.d[label][space_unit] = []
+                self.d[label][space_unit].append(cpu_used)
+
+
     def load_stream(self, filepath, label='stream_xput'):
         stream_files = glob.glob(filepath + '-core*')
         if not label in self.d:
@@ -129,6 +149,23 @@ class StatStore:
                         continue
                     cols = line.split()
                     self.d[label][space_unit].append(float(cols[2]))
+    
+    def load_mmapbench(self, filepath, label='mmapbench_xput'):
+        stream_files = glob.glob(filepath + '-core*')
+        if not label in self.d:
+            self.d[label] = {}
+        for sfile in stream_files:
+            core_idx = int(re.match('.*-core(\d+)-thread(\d+)$', sfile)[1])
+            # thread_idx = int(re.match('.*-core(\d+)-thread(\d+)$', sfile)[2])
+            space_unit = 'CORE%d' % (core_idx)
+            if not space_unit in self.d[label]:
+                self.d[label][space_unit] = [0.0]
+            with open(sfile, 'r') as f:
+                for line in f:
+                    if not 'Throughput' in line:
+                        continue
+                    cols = line.split()
+                    self.d[label][space_unit][0] += float(cols[2])
 
     def load_mlc(self, filepath):
         with open(filepath, 'r') as f:

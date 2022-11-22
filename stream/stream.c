@@ -717,6 +717,14 @@ double STREAM_NtWrite64(uint64_t *read_checksum) {
 	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
 }
 
+double STREAM_Triad(uin64_t *read_checksum) {
+	ssize_t j;
+	for (j=0; j<STREAM_ARRAY_SIZE; j++) {
+	    a[j] = b[j]+3.0*c[j];
+	}
+	return (3*STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+}
+
 
 double STREAM_NtWrite64_Random(uint64_t *read_checksum) {
 	int j;
@@ -928,6 +936,8 @@ main(int argc, char **argv)
 		execute = &STREAM_NtWrite64;
 	} else if(strcmp(workload, "NtWrite64Random") == 0) {
 		execute = &STREAM_NtWrite64_Random;
+	} else if(strcmp(workload, "Triad") == 0) {
+		execute = &STREAM_Triad;
 	} else {
 		printf("Unknown workload\n");
 		exit(-1);

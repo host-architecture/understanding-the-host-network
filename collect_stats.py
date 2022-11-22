@@ -21,7 +21,7 @@ def expand_ranges(x):
 parser = argparse.ArgumentParser()
 parser.add_argument('config', help='Label for experiment')
 parser.add_argument('columns', help='Metrics to collect. Comma separated. <core/imc/io>:<metric>:<agg>')
-parser.add_argument('--filter_core_list', help='List of cores to filter metrics on', default='3,7,11,15,19,23,27,31')
+parser.add_argument('--filter_core_list', help='List of cores to filter metrics on', default='1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71,73,75,77,79,81,83,85,87,89,91,93,95,97,99,101,103,105,107,109,111,113,115,117,119,121,123,125,127')
 parser.add_argument('--filter_num_cores', help='Number of cores from filter_core_list to filter on', type=int, default=1)
 parser.add_argument('--filter_channels', help='List of memory channels to filter on', default='SKT3CHAN0,SKT3CHAN3')
 parser.add_argument('--agg_time', help='Aggregation in time dimension', default='avg')
@@ -101,6 +101,14 @@ if len(glob.glob(filepath)) > 0:
 filepath= os.path.join(STATS_PATH, args.config + '.redis.txt')
 if len(glob.glob(filepath + '-core*')) > 0:
     ss.load_redis(filepath)
+
+filepath= os.path.join(STATS_PATH, args.config + '.mmapbench.txt')
+if len(glob.glob(filepath + '-core*')) > 0:
+    ss.load_mmapbench(filepath)
+
+filepath= os.path.join(STATS_PATH, args.config + '.sar.txt')
+if os.path.isfile(filepath):
+    ss.load_sar(filepath)
 
 filter_cores = args.filter_core_list.split(',')
 filter_cores = filter_cores[:args.filter_num_cores]

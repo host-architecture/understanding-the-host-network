@@ -5,5 +5,6 @@
     "FIO_PATH": "/home/midhul/fio",
     "STREAM_PATH": "/home/midhul/mio/stream",
     "REDIS_PATH": "/home/midhul/redis/src",
-    "MEMTIER_PATH": "/home/midhul/memtier_benchmark"
+    "MEMTIER_PATH": "/home/midhul/memtier_benchmark",
+    "MMAPBENCH_PATH": "/home/midhul/mio/mmapbench"
 }
