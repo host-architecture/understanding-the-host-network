@@ -15,6 +15,8 @@ class Environment:
         self.redis_path = None
         self.memtier_path = None
         self.mmapbench_path = None
+        self.ssds = None
+        self.mem_channels = None
 
         if 'MLC_PATH' in config_dict:
             self.mlc_path = config_dict['MLC_PATH']
@@ -42,7 +44,25 @@ class Environment:
 
         # Get cpu topology
         # TODO: Make this generic
-        self.numa_cores = [[0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88,90,92,94,96,98,100,102,104,106,108,110,112,114,116,118,120,122,124,126], [1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71,73,75,77,79,81,83,85,87,89,91,93,95,97,99,101,103,105,107,109,111,113,115,117,119,121,123,125,127]]
+        if 'NUMA_CORES' not in config_dict:
+            raise Exception('NUMA_CORES not defined in config')
+        self.numa_cores = [[int(z) for z in y.split(',')] for y in config_dict['NUMA_CORES']]
+        # self.numa_cores = [[0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88,90,92,94,96,98,100,102,104,106,108,110,112,114,116,118,120,122,124,126], [1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71,73,75,77,79,81,83,85,87,89,91,93,95,97,99,101,103,105,107,109,111,113,115,117,119,121,123,125,127]]
+
+        # Default numa order
+        if 'NUMA_ORDER' not in config_dict:
+            raise Exception('NUMA_ORDER not defined in config')
+        self.numa_order = [int(x) for x in config_dict['NUMA_ORDER'].split(',')]
+        if len(self.numa_order) > len(self.numa_cores):
+            raise Exception('config error: Length of NUMA_ORDER exceeds number of NUMA nodes')
+
+        if 'SSDS' in config_dict:
+            self.ssds = config_dict['SSDS']
+
+        if 'MEM_CHANNELS' in config_dict:
+            self.mem_channels = config_dict['MEM_CHANNELS']
+
+
 
         if os.system('modprobe msr') != 0:
             raise Exception('Failed to load msr kernel module')
@@ -116,3 +136,16 @@ class Environment:
 
     def get_cores_in_numa(self, i):
         return self.numa_cores[i]
+
+    def get_numa_order(self):
+        return self.numa_order
+
+    def get_ssds(self):
+        if not self.ssds:
+            raise Exception('SSDS config not found')
+        return self.ssds
+
+    def get_mem_channels(self):
+        if not self.mem_channels:
+            raise Exception('MEM_CHANNELS config not found')
+        return self.mem_channels

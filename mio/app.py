@@ -18,6 +18,7 @@ FIO_PRESTART_DURATION = 0
 ANT_WARMUP_DURATION = 10
 ANT_COOLDOWN_DURATION = 10
 
+# TODO: Adapt for Icelake
 events_group_0 = {'lfb_occ_agg': 'core/config=0x0000000000430148', 'lfb_cycles': 'core/config=0x0000000001430148', 'lfb_l1_misses': 'core/config=0x00000000004308d1', 'lfb_full': 'core/config=0x0000000000430248'}
 events_group_1 = {'load_l1_hits': 'core/config=0x00000000004301d1', 'load_l1_misses': 'core/config=0x00000000004308d1', 'load_l1_fbhit': 'core/config=0x00000000004340d1', 'loads': 'core/config=0x00000000004381d0'}
 events_group_2 = {'load_l2_hits': 'core/config=0x00000000004302d1', 'load_l2_misses': 'core/config=0x00000000004310d1', 'load_l3_hits': 'core/config=0x00000000004304d1', 'load_l3_misses': 'core/config=0x00000000004320d1'}
@@ -29,7 +30,7 @@ events_group_7 = {'tor_drd_miss_occ_agg': 'cha/config=0x0000000000402536,config2
 events_group_8 = {'write_inserts_pcitom': 'irp/config=0x0000000000401010', 'irp_write_occupancy': 'irp/config=0x000000000040040f'}
 events_group_9 = {'irp_cycles': 'irp/config=0x0000000000400001'}
 
-SSD = ['/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1', '/dev/nvme6n1', '/dev/nvme7n1']
+# SSD = ['/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1', '/dev/nvme6n1', '/dev/nvme7n1']
 # SSD = ['/dev/nvme0n1', '/dev/nvme1n1', '/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1']
 # sdb, sdc, sde, sdh, sdi, sdj, sdk
 #SSD = ['/dev/sdc', '/dev/sde', '/dev/sdi', '/dev/sdj', '/dev/sdb', '/dev/sdh', '/dev/sdk']
@@ -87,7 +88,7 @@ def run_benchmark(args, env):
                 cores += env.get_cores_in_numa(numa_idx)
         if args.fio:
             fio_core_list = [int(y) for y in args.fio_cpus.split(',')]
-        cores = [x for x in cores if x not in fio_core_list]
+            cores = [x for x in cores if x not in fio_core_list]
         cores = cores[:num_cores]
 
         if args.ant == 'mlc':
@@ -145,6 +146,7 @@ def run_benchmark(args, env):
 
     fios = []
     if args.fio:
+        SSD = env.get_ssds()
         if args.ant:
             time.sleep(FIO_PRESTART_DURATION)
         for i in range(args.fio_num_ssds):
@@ -258,15 +260,20 @@ def main(argv=[]):
     root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     config_path = os.path.join(root_dir, 'config.json')
 
+    env = Environment(config_path)
+
     atexit.register(cleanup)
+
+    default_numa = env.get_numa_order()[0]
+    default_core = env.get_cores_in_numa(default_numa)[0] 
 
     parser = argparse.ArgumentParser()
     parser.add_argument('config', help='Label for experiment')
     parser.add_argument('--ant', help='What antagonist to use (mlc/stream)')
     parser.add_argument('--ant_cpus', help='List of CPUs to run antagonist on')
     parser.add_argument('--ant_num_cores', help='Number of cores to run antagonist on', default='1')
-    parser.add_argument('--ant_mem_numa', help='Number of cores to run antagonist on', type=int, default=0)
-    parser.add_argument('--ant_numa_order', help='Order of NUMA nodes to use for antagonist', default='0,1,2,3')
+    parser.add_argument('--ant_mem_numa', help='NUMA node to allocate antagonist memory on', type=int, default=default_numa)
+    parser.add_argument('--ant_numa_order', help='Order of NUMA nodes to use for antagonist', default=','.join([str(x) for x in env.get_numa_order()]))
     parser.add_argument('--ant_inst_size', help='Instruction size for antagonist', type=int)
     parser.add_argument('--ant_pattern', help='Antagonist access pattern')
     parser.add_argument('--ant_chunksize', help='Antagonist chunk size for random access pattern', type=int)
@@ -280,8 +287,8 @@ def main(argv=[]):
     parser.add_argument('--disable_prefetch', help='Disable prefetchers', action='store_true')
     parser.add_argument('--disable_prefetch_l1', help='Disable L1 prefetchers', action='store_true')
     parser.add_argument('--fio', help='Run fio', action='store_true')
-    parser.add_argument('--fio_mem_numa', help='what it says', type=int, default=0)
-    parser.add_argument('--fio_cpus', help='List of CPUs to run fio on', default='3')
+    parser.add_argument('--fio_mem_numa', help='what it says', type=int, default=default_numa)
+    parser.add_argument('--fio_cpus', help='List of CPUs to run fio on', default=str(default_core))
     parser.add_argument('--fio_writefrac', help='what it says', type=int, default=0)
     parser.add_argument('--fio_iosize', help='what it says', type=int, default=4096)
     parser.add_argument('--fio_iodepth', help='what it says', type=int, default=1)
@@ -289,9 +296,9 @@ def main(argv=[]):
     parser.add_argument('--fio_duration', help='what it says', type=int, default=10)
     parser.add_argument('--fio_rate', help='what it says', type=int)
     parser.add_argument('--ant2', help='What antagonist to use (mlc/stream)')
-    parser.add_argument('--ant2_cpus', help='List of cores to run antagonist on', default='3')
+    parser.add_argument('--ant2_cpus', help='List of cores to run antagonist on', default=str(default_core))
     parser.add_argument('--ant2_num_cores', help='Number of cores to run antagonist on', type=int, default=1)
-    parser.add_argument('--ant2_mem_numa', help='Number of cores to run antagonist on', type=int, default=0)
+    parser.add_argument('--ant2_mem_numa', help='Number of cores to run antagonist on', type=int, default=default_numa)
     parser.add_argument('--ant2_inst_size', help='Instruction size for antagonist', type=int)
     parser.add_argument('--ant2_pattern', help='Antagonist access pattern')
     parser.add_argument('--ant2_writefrac', help='Antagonist write fraction (percentage)', type=int)
@@ -304,7 +311,7 @@ def main(argv=[]):
     parser.add_argument('--sync_durations', help='Synchronize durations of apps', action='store_true')
     parser.add_argument('--mmapbench', help='Run mmapbench', action='store_true')
     parser.add_argument('--mmapbench_mem_numa', help='what it says', type=int, default=0)
-    parser.add_argument('--mmapbench_cpus', help='List of CPUs to run fio on', default='NUMA1')
+    parser.add_argument('--mmapbench_cpus', help='List of CPUs to run mmapbench on', default='NUMA1')
     parser.add_argument('--mmapbench_num_cores', help='what it says', type=int, default=1)
     parser.add_argument('--mmapbench_writefrac', help='what it says', type=int, default=0)
     parser.add_argument('--mmapbench_num_ssds', help='what it says', type=int, default=1)
@@ -320,7 +327,6 @@ def main(argv=[]):
     args = parser.parse_args(argv[1:])
     x_ncores = expand_ranges(args.ant_num_cores)
 
-    env = Environment(config_path)
 
     for x in x_ncores:
         args.ant_num_cores = x

@@ -1,6 +1,7 @@
 import sys, os, glob
 import argparse
 
+from mio.env import *
 from mio.stats import *
 
 STATS_PATH = '/home/midhul/membw-eval'
@@ -18,16 +19,22 @@ def expand_ranges(x):
     return result
 
 
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '.'))
+config_path = os.path.join(root_dir, 'config.json')
+env = Environment(config_path)
+
 parser = argparse.ArgumentParser()
 parser.add_argument('config', help='Label for experiment')
 parser.add_argument('columns', help='Metrics to collect. Comma separated. <core/imc/io>:<metric>:<agg>')
-parser.add_argument('--filter_core_list', help='List of cores to filter metrics on', default='1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71,73,75,77,79,81,83,85,87,89,91,93,95,97,99,101,103,105,107,109,111,113,115,117,119,121,123,125,127')
+default_core_list = ','.join([str(x) for x in env.get_cores_in_numa(env.get_numa_order()[0])])
+parser.add_argument('--filter_core_list', help='List of cores to filter metrics on', default=default_core_list)
 parser.add_argument('--filter_num_cores', help='Number of cores from filter_core_list to filter on', type=int, default=1)
-parser.add_argument('--filter_channels', help='List of memory channels to filter on', default='SKT3CHAN0,SKT3CHAN3')
+parser.add_argument('--filter_channels', help='List of memory channels to filter on', default=','.join(env.get_mem_channels()))
 parser.add_argument('--agg_time', help='Aggregation in time dimension', default='avg')
 parser.add_argument('--io_size', help='IO size for FIO', type=int, default=8*1024*1024)
 parser.add_argument('--filter_chas', help='List of CHAs to filter metrics on', default='SKT3C0,SKT3C1,SKT3C2,SKT3C3,SKT3C4,SKT3C5,SKT3C6,SKT3C7,SKT3C8,SKT3C9,SKT3C10,SKT3C11,SKT3C12,SKT3C13,SKT3C14,SKT3C15,SKT3C16,SKT3C17')
 parser.add_argument('--filter_irps', help='List of IRPs to filter metrics on', default='SKT3IRP1,SKT3IRP2')
+default_ssds = ['SSD%d'%(i) for i in range(len(env.get_ssds()))]
 parser.add_argument('--filter_ssds', help='List of SSDs to filter metrics on', default='SSD0,SSD1,SSD2,SSD3,SSD4,SSD5')
 
 args = parser.parse_args(sys.argv[1:])
