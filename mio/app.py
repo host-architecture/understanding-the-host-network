@@ -6,6 +6,7 @@ from .pcm import *
 from .fio import *
 from .stream import *
 from .redis import *
+from .gapbs import *
 
 import os, time
 import argparse
@@ -18,7 +19,7 @@ FIO_PRESTART_DURATION = 0
 ANT_WARMUP_DURATION = 10
 ANT_COOLDOWN_DURATION = 10
 
-# TODO: Adapt for Icelake
+# Cascadelake
 events_group_0 = {'lfb_occ_agg': 'core/config=0x0000000000430148', 'lfb_cycles': 'core/config=0x0000000001430148', 'lfb_l1_misses': 'core/config=0x00000000004308d1', 'lfb_full': 'core/config=0x0000000000430248'}
 events_group_1 = {'load_l1_hits': 'core/config=0x00000000004301d1', 'load_l1_misses': 'core/config=0x00000000004308d1', 'load_l1_fbhit': 'core/config=0x00000000004340d1', 'loads': 'core/config=0x00000000004381d0'}
 events_group_2 = {'load_l2_hits': 'core/config=0x00000000004302d1', 'load_l2_misses': 'core/config=0x00000000004310d1', 'load_l3_hits': 'core/config=0x00000000004304d1', 'load_l3_misses': 'core/config=0x00000000004320d1'}
@@ -29,6 +30,12 @@ events_group_6 = {'pre_miss': 'imc/config=0x000000000040102', 'pre_close': 'imc/
 events_group_7 = {'tor_drd_miss_occ_agg': 'cha/config=0x0000000000402536,config2=0x40433', 'tor_drd_miss_inserts': 'cha/config=0x0000000000402535,config2=0x40433', 'unc_clk': 'cha/config=0x0000000000400000'}
 events_group_8 = {'write_inserts_pcitom': 'irp/config=0x0000000000401010', 'irp_write_occupancy': 'irp/config=0x000000000040040f'}
 events_group_9 = {'irp_cycles': 'irp/config=0x0000000000400001'}
+
+# Icelake
+# events_group_0 = {'lfb_occ_agg': 'core/config=0x0000000000430148', 'lfb_cycles': 'core/config=0x0000000001430148', 'lfb_l1_misses': 'core/config=0x00000000004308d1', 'lfb_full': 'core/config=0x0000000000430248'}
+# events_group_1 = {'load_l1_hits': 'core/config=0x00000000004301d1', 'load_l1_misses': 'core/config=0x00000000004308d1', 'load_l1_fbhit': 'core/config=0x00000000004340d1', 'loads': 'core/config=0x00000000004381d0'}
+# events_group_2 = {'load_l2_hits': 'core/config=0x00000000004302d1', 'load_l2_misses': 'core/config=0x00000000004310d1', 'load_l3_hits': 'core/config=0x00000000004304d1', 'load_l3_misses': 'core/config=0x00000000004320d1'}
+# events_group_3 = {'rpq_occ_agg': 'imc/config=0x0000000000400080', 'rpq_occ_agg1': 'imc/config=0x0000000000400081', 'wpq_occ_agg': 'imc/config=0x000000000040082', 'wpq_occ_agg1': 'imc/config=0x000000000040083'}
 
 # SSD = ['/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1', '/dev/nvme6n1', '/dev/nvme7n1']
 # SSD = ['/dev/nvme0n1', '/dev/nvme1n1', '/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1']
@@ -97,6 +104,8 @@ def run_benchmark(args, env):
             ant = STREAMRunner(env.get_stream_path())
         elif args.ant == 'redis':
             ant = RedisRunner(env.get_redis_path(), env.get_memtier_path())
+        elif args.ant == 'gapbs':
+            ant = GAPBSRunner(env.get_gapbs_path())
         else:
             raise Exception('Unknown antagonist')
 
@@ -159,6 +168,8 @@ def run_benchmark(args, env):
             fio_duration = args.fio_duration
             if args.ant and args.sync_durations:
                 fio_duration = args.ant_duration + 2*(ANT_WARMUP_DURATION-FIO_PRESTART_DURATION)
+            if args.fio_until_ant:
+                fio_duration = 10000
             fio.run(fio_duration)
             fios.append(fio)
 
@@ -203,6 +214,7 @@ def run_benchmark(args, env):
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l1.txt'%(prefix, num_cores)), events_group_1, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l2l3.txt'%(prefix, num_cores)), events_group_2, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-imc.txt'%(prefix, num_cores)), events_group_3, RECORD_DURATION)
+        # Following only for CascadeLake. (comment out for IceLake)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-modes.txt'%(prefix, num_cores)), events_group_4, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cas.txt'%(prefix, num_cores)), events_group_5, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-pre.txt'%(prefix, num_cores)), events_group_6, RECORD_DURATION)
@@ -231,7 +243,7 @@ def run_benchmark(args, env):
 
 
 
-    if args.fio:
+    if args.fio and not args.fio_until_ant:
         for fio in fios:
             fio.wait()
 
@@ -240,6 +252,12 @@ def run_benchmark(args, env):
 
     if ant:
         ant.wait()
+
+    if args.fio and args.fio_until_ant:
+        for fio in fios:
+            fio.end()
+        for fio in fios:
+            fio.wait()
 
     if ant2:
         ant2.wait()
@@ -295,6 +313,7 @@ def main(argv=[]):
     parser.add_argument('--fio_num_ssds', help='what it says', type=int, default=1)
     parser.add_argument('--fio_duration', help='what it says', type=int, default=10)
     parser.add_argument('--fio_rate', help='what it says', type=int)
+    parser.add_argument('--fio_until_ant', help='Run fio until ant is finished', action='store_true')
     parser.add_argument('--ant2', help='What antagonist to use (mlc/stream)')
     parser.add_argument('--ant2_cpus', help='List of cores to run antagonist on', default=str(default_core))
     parser.add_argument('--ant2_num_cores', help='Number of cores to run antagonist on', type=int, default=1)

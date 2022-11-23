@@ -117,6 +117,10 @@ filepath= os.path.join(STATS_PATH, args.config + '.sar.txt')
 if os.path.isfile(filepath):
     ss.load_sar(filepath)
 
+filepath= os.path.join(STATS_PATH, args.config + '.gapbs.txt')
+if os.path.isfile(filepath):
+    ss.load_gapbs(filepath)
+
 filter_cores = args.filter_core_list.split(',')
 filter_cores = filter_cores[:args.filter_num_cores]
 filter_cores = ['CORE' + x for x in filter_cores]

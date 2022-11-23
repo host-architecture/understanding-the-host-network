@@ -1,4 +1,4 @@
-import subprocess, os
+import subprocess, os, signal
 
 
 class FIORunner:
@@ -38,6 +38,8 @@ class FIORunner:
         
         self.proc = subprocess.Popen(args, stdout=out_f, stderr=subprocess.STDOUT)
 
+    def end(self):
+        os.kill(self.proc.pid, signal.SIGINT)
 
     def set_ratecap(self, val):
         self.rate_cap = val

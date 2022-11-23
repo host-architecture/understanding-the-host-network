@@ -15,6 +15,7 @@ class Environment:
         self.redis_path = None
         self.memtier_path = None
         self.mmapbench_path = None
+        self.gapbs_path = None
         self.ssds = None
         self.mem_channels = None
 
@@ -41,6 +42,9 @@ class Environment:
 
         if 'MEMTIER_PATH' in config_dict:
             self.memtier_path = config_dict['MEMTIER_PATH']
+
+        if 'GAPBS_PATH' in config_dict:
+            self.gapbs_path = config_dict['GAPBS_PATH']
 
         # Get cpu topology
         # TODO: Make this generic
@@ -102,10 +106,16 @@ class Environment:
         if not self.memtier_path:
             raise Exception('Memtier Path not specified')
         return self.memtier_path
+
     def get_mmapbench_path(self):
         if not self.mmapbench_path:
             raise Exception('MMAPBENCH_PATH not specified')
         return self.mmapbench_path
+
+    def get_gapbs_path(self):
+        if not self.gapbs_path:
+            raise Exception('GAPBS_PATH not specificed')
+        return self.gapbs_path
 
     def enable_prefetch(self):
         if os.system('wrmsr -a 0x1a4 0') != 0:

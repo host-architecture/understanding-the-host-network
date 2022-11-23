@@ -7,6 +7,7 @@ class StatStore:
     def __init__(self):
         self.d = {}
 
+        # CascadeLake
         self.derived_metrics = {
             'lfb_latency': (lambda x, y, z: 1e9*(x/y)/z, ['lfb_occ_agg', 'lfb_cycles', 'lfb_l1_misses']),
             'l1_miss_latency_adj': (lambda x, y: 1e9*(x/y), ['fb_occupancy', 'lfb_l1_misses']),
@@ -34,6 +35,20 @@ class StatStore:
             'acts_read_total': (lambda x, y: x + 4, ['acts_read', 'acts_byp']),
             'lines_written': (lambda x: x*1e6/64, ['memwritebw'])
         }
+
+        # IceLake
+        # self.derived_metrics = {
+        #     'lfb_latency': (lambda x, y, z: 1e9*(x/y)/z, ['lfb_occ_agg', 'lfb_cycles', 'lfb_l1_misses']),
+        #     'l1_miss_latency_adj': (lambda x, y: 1e9*(x/y), ['fb_occupancy', 'lfb_l1_misses']),
+        #     'lfb_occupancy': (lambda x, y: x/y, ['lfb_occ_agg', 'lfb_cycles']),
+        #     'lfb_fillfrac': (lambda x, y: x/y, ['lfb_full', 'lfb_cycles']),
+        #     'l1_missrate': (lambda x, y, z: (x+y)/z, ['load_l1_misses', 'load_l1_fbhit', 'loads']),
+        #     'l2_missrate': (lambda x, y: (x)/(x+y), ['load_l2_misses', 'load_l2_hits']),
+        #     'l3_missrate': (lambda x, y: (x)/(x+y), ['load_l3_misses', 'load_l3_hits']),
+        #     'rpq_occupancy': (lambda x, y: (x + y)/1600000000.0, ['rpq_occ_agg', 'rpq_occ_agg1']),
+        #     'wpq_occupancy': (lambda x, y: (x + y)/1600000000.0, ['wpq_occ_agg', 'wpq_occ_agg1']),
+        #     'io_xput': (lambda x: x/8.0, ['fio_xput'])
+        # }
 
     def load_pcm_raw(self, filepath):
         # parse and load PCM raw output file
@@ -258,6 +273,17 @@ class StatStore:
                         continue
                     cols = line.split()
                     self.d[label][space_unit].append(float(cols[2]))
+
+    def load_gapbs(self, filepath):
+        with open(filepath, 'r') as f:
+            for line in f:
+                if not 'Trial Time:' in line:
+                    continue
+                cols = line.split()
+                if not 'gapbs_time' in self.d:
+                    self.d['gapbs_time'] = {}
+                    self.d['gapbs_time']['ALL'] = []
+                self.d['gapbs_time']['ALL'].append(float(cols[2]))
             
 
     def query(self, metric, agg_space='avg', agg_time='avg', filter=None):
