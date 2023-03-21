@@ -3,6 +3,7 @@ import argparse
 
 from mio.env import *
 from mio.stats import *
+import mio.model as model
 
 STATS_PATH = '/home/midhul/membw-eval'
 
@@ -36,6 +37,7 @@ parser.add_argument('--filter_chas', help='List of CHAs to filter metrics on', d
 parser.add_argument('--filter_irps', help='List of IRPs to filter metrics on', default='SKT3IRP1,SKT3IRP2')
 default_ssds = ['SSD%d'%(i) for i in range(len(env.get_ssds()))]
 parser.add_argument('--filter_ssds', help='List of SSDs to filter metrics on', default='SSD0,SSD1,SSD2,SSD3,SSD4,SSD5')
+parser.add_argument('--model', help='Apply model')
 
 args = parser.parse_args(sys.argv[1:])
 
@@ -80,6 +82,26 @@ if os.path.isfile(filepath):
 filepath= os.path.join(STATS_PATH, args.config + '.pcm-cha.txt')
 if os.path.isfile(filepath):
     ss.load_pcm_raw(filepath)
+
+filepath= os.path.join(STATS_PATH, args.config + '.pcm-cha2.txt')
+if os.path.isfile(filepath):
+        ss.load_pcm_raw(filepath)
+
+filepath= os.path.join(STATS_PATH, args.config + '.pcm-cha3.txt')
+if os.path.isfile(filepath):
+            ss.load_pcm_raw(filepath)
+
+filepath= os.path.join(STATS_PATH, args.config + '.pcm-mesh1.txt')
+if os.path.isfile(filepath):
+                ss.load_pcm_raw(filepath)
+
+filepath= os.path.join(STATS_PATH, args.config + '.pcm-mesh2.txt')
+if os.path.isfile(filepath):
+                ss.load_pcm_raw(filepath)
+
+filepath= os.path.join(STATS_PATH, args.config + '.pcm-mesh3.txt')
+if os.path.isfile(filepath):
+                ss.load_pcm_raw(filepath)
 
 filepath= os.path.join(STATS_PATH, args.config + '.pcm-irp.txt')
 if os.path.isfile(filepath):
@@ -135,21 +157,37 @@ res = []
 for col in cols:
     elems = col.split(':')
     metric_type = elems[0]
-    metric = elems[1]
-    metric_agg = elems[2]
+    if metric_type == 'model':
+        model_name = elems[1]
+        model_metric = elems[2]
 
-    metric_filter = None
-    if metric_type == 'core':
-        metric_filter = filter_cores
-    elif metric_type == 'imc':
-        metric_filter = filter_channels
-    elif metric_type == 'cha':
-        metric_filter = filter_chas
-    elif metric_type == 'irp':
-        metric_filter = filter_irps
-    elif metric_type == 'io':
-        metric_filter = filter_io
+        # Pass on filters
+        filters = {
+            'cores': filter_cores,
+            'channels': filter_channels,
+            'chas': filter_chas,
+            'irps': filter_irps,
+            'io': filter_io
+        }
 
-    res += ss.query(metric, agg_space=metric_agg, agg_time=args.agg_time, filter=metric_filter)
+        res += model.query(ss, model_name, model_metric, filters)
+
+    else:
+        metric = elems[1]
+        metric_agg = elems[2]
+
+        metric_filter = None
+        if metric_type == 'core':
+            metric_filter = filter_cores
+        elif metric_type == 'imc':
+            metric_filter = filter_channels
+        elif metric_type == 'cha':
+            metric_filter = filter_chas
+        elif metric_type == 'irp':
+            metric_filter = filter_irps
+        elif metric_type == 'io':
+            metric_filter = filter_io
+
+        res += ss.query(metric, agg_space=metric_agg, agg_time=args.agg_time, filter=metric_filter)
 
 print(' '.join([str(x) for x in res]))

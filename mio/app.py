@@ -14,7 +14,7 @@ import atexit
 
 WARMUP_DURATION = 10
 RECORD_DURATION = 5
-RECORD_GROUPS = 9
+RECORD_GROUPS = 15
 FIO_PRESTART_DURATION = 0
 ANT_WARMUP_DURATION = 10
 ANT_COOLDOWN_DURATION = 10
@@ -27,9 +27,16 @@ events_group_3 = {'rpq_occ_agg': 'imc/config=0x0000000000400080', 'wpq_full_cycl
 events_group_4 = {'wmm_to_rmm_starve': 'imc/config=0x0000000000402c0', 'wmm': 'imc/config=0x0000000000400207', 'wmm_to_rmm': 'imc/config=0x0000000000407c0', 'acts_write': 'imc/config=0x000000000040201'}
 events_group_5 = {'wr_wmm': 'imc/config=0x0000000000400404', 'wr_rmm': 'imc/config=0x0000000000400804', 'rd_wmm': 'imc/config=0x000000000041004', 'rd_rmm': 'imc/config=0x000000000042004'}
 events_group_6 = {'pre_miss': 'imc/config=0x000000000040102', 'pre_close': 'imc/config=0x000000000040202', 'pre_rd': 'imc/config=0x000000000040402', 'pre_wr': 'imc/config=0x000000000040802'}
-events_group_7 = {'tor_drd_miss_occ_agg': 'cha/config=0x0000000000402536,config2=0x40433', 'tor_drd_miss_inserts': 'cha/config=0x0000000000402535,config2=0x40433', 'unc_clk': 'cha/config=0x0000000000400000'}
-events_group_8 = {'write_inserts_pcitom': 'irp/config=0x0000000000401010', 'irp_write_occupancy': 'irp/config=0x000000000040040f'}
+#events_group_7 = {'tor_drd_miss_occ_agg': 'cha/config=0x0000000000402536,config2=0x40433', 'tor_drd_miss_inserts': 'cha/config=0x0000000000402535,config2=0x40433', 'unc_clk': 'cha/config=0x0000000000400000'}
+events_group_7 = {'cha_write_no_credits': 'cha/config=0x000000000040035a', 'unc_clk': 'cha/config=0x0000000000400000'}
+events_group_8 = {'write_inserts': 'irp/config=0x0000000000401810', 'irp_write_occupancy': 'irp/config=0x000000000040040f'}
 events_group_9 = {'irp_cycles': 'irp/config=0x0000000000400001'}
+events_group_10 = {'ia_wbmtoi_occ_agg': 'cha/config=0x0000000000403136,config2=0x48833'}
+events_group_11 = {'io_itom_occ_agg': 'cha/config=0x0000000000403436,config2=0x49033'}
+events_group_12 = {'cha_horz_bl_used': 'cha/config=0x0000000000400fab', 'cha_vert_bl_used': 'cha/config=0x0000000000400faa', 'cha_horx_ad_used': 'cha/config=0x0000000000400fa7', 'horz_ad_util': 'cha/config=0x0000000000400fa6'}
+events_group_13 = {'cha_rxr_busy_starved': 'cha/config=0x00000000004084b4', 'cha_rxr_crd_starved': 'cha/config=0x00000000004044b3', 'cha_txr_horz_starved': 'cha/config=0x000000000040049b', 'cha_stall_txr_bl_ag1': 'cha/config=0x0000000000403fd6'}
+events_group_14 = {'cha_txr_horz_nack': 'cha/config=0x0000000000404499', 'cha_txr_vert_nack': 'cha/config=0x0000000000404098', 'cha_txr_horx_occ': 'cha/config=0x0000000000404494', 'cha_rxr_occ': 'cha/config=0x00000000004044b0'}
+
 
 # Icelake
 # events_group_0 = {'lfb_occ_agg': 'core/config=0x0000000000430148', 'lfb_cycles': 'core/config=0x0000000001430148', 'lfb_l1_misses': 'core/config=0x00000000004308d1', 'lfb_full': 'core/config=0x0000000000430248'}
@@ -210,16 +217,21 @@ def run_benchmark(args, env):
         pcm_latency.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-latency.txt'%(prefix, num_cores)), RECORD_DURATION)
         pcm_raw = PcmRawRunner(env.get_pcm_path())
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-lfb.txt'%(prefix, num_cores)), events_group_0, RECORD_DURATION)
-        # pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha.txt'%(prefix, num_cores)), events_group_7, RECORD_DURATION)
-        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l1.txt'%(prefix, num_cores)), events_group_1, RECORD_DURATION)
-        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l2l3.txt'%(prefix, num_cores)), events_group_2, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha.txt'%(prefix, num_cores)), events_group_7, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha2.txt'%(prefix, num_cores)), events_group_10, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha3.txt'%(prefix, num_cores)), events_group_11, RECORD_DURATION)
+        #pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l1.txt'%(prefix, num_cores)), events_group_1, RECORD_DURATION)
+        #pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l2l3.txt'%(prefix, num_cores)), events_group_2, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-imc.txt'%(prefix, num_cores)), events_group_3, RECORD_DURATION)
         # Following only for CascadeLake. (comment out for IceLake)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-modes.txt'%(prefix, num_cores)), events_group_4, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cas.txt'%(prefix, num_cores)), events_group_5, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-pre.txt'%(prefix, num_cores)), events_group_6, RECORD_DURATION)
-        #pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-irp.txt'%(prefix, num_cores)), events_group_8, RECORD_DURATION)
-        #pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-irp2.txt'%(prefix, num_cores)), events_group_9, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-irp.txt'%(prefix, num_cores)), events_group_8, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-irp2.txt'%(prefix, num_cores)), events_group_9, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-mesh1.txt'%(prefix, num_cores)), events_group_12, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-mesh2.txt'%(prefix, num_cores)), events_group_13, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-mesh3.txt'%(prefix, num_cores)), events_group_14, RECORD_DURATION)
     elif args.stats_membw:
         pcm_mem = PcmMemoryRunner(env.get_pcm_path())
         time.sleep(WARMUP_DURATION)
