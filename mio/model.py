@@ -58,6 +58,8 @@ def query(ss, model_name, model_metric, filters):
         compute_writelat(ss, res, filters, CONST_WRITE_IO, agent='io', sched='rr*', xpr='adj', pfillfactor=2)
     elif model_name == 'writelatcpu11':
         compute_writelat(ss, res, filters, CONST_WRITE_CPU, agent='cpu', sched='rr*', xpr='adj', pfillfactor=2)
+    elif model_name == 'writelatcpu12':
+        compute_writelat(ss, res, filters, CONST_WRITE_CPU, agent='cpu', sched='sq*', xpr='adj')
     else:
         raise Exception('Unknown model name')
 

@@ -29,6 +29,7 @@ class StatStore:
             'read_activations': (lambda x, y: x + y, ['acts_read', 'acts_byp']),
             'cha_miss_latency': (lambda x, y, z: 1e9*(x/y)/z, ['tor_drd_miss_occ_agg', 'unc_clk', 'tor_drd_miss_inserts']),
             'irp_write_latency': (lambda x, y, z: 1e9*(x/(z+0.0000000005))/(y+0.0000000000005), ['irp_write_occupancy', 'write_inserts_pcitom', 'irp_cycles']),
+            'irp_occupancy': (lambda x, y: x/(y+0.0000000000005), ['irp_write_occupancy', 'irp_cycles']),
             'io_xput': (lambda x: x/8.0, ['fio_xput']),
             'lines_read': (lambda x: (x - 228.5)*1e6/64, ['memreadbw']),
             'pre_conflict_read': (lambda x, y, z: (x*z)/(x+y), ['pre_miss', 'pre_close', 'pre_rd']),
