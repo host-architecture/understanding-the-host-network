@@ -717,7 +717,7 @@ double STREAM_NtWrite64(uint64_t *read_checksum) {
 	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
 }
 
-double STREAM_Triad(uin64_t *read_checksum) {
+double STREAM_Triad(uint64_t *read_checksum) {
 	ssize_t j;
 	for (j=0; j<STREAM_ARRAY_SIZE; j++) {
 	    a[j] = b[j]+3.0*c[j];
@@ -738,6 +738,21 @@ double STREAM_NtWrite64_Random(uint64_t *read_checksum) {
 	}
 
 	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+}
+
+double STREAM_ReadWrite64_Random(uint64_t *read_checksum) {
+	int j;
+	__m512i val = _mm512_set_epi32(1995, 1995, 2002, 2002, 1995, 1995, 2002, 2002, 1995, 1995, 2002, 2002, 1995, 1995, 2002, 2002);
+	uint64_t x = 432437644;
+	for (j=0; j<STREAM_ARRAY_SIZE; j += 8) {
+		__m512i mm_a = _mm512_load_si512(&a[8*(x & (READ64_ARRAY_COUNT - 1))]);
+		_mm512_store_si512(&a[8*(x & (READ64_ARRAY_COUNT - 1))], _mm512_add_epi32(mm_a, val));
+		x ^= x << 13;
+		x ^= x >> 7;
+		x ^= x << 17;
+	}
+
+	return (2*STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
 }
 
 
@@ -938,6 +953,8 @@ main(int argc, char **argv)
 		execute = &STREAM_NtWrite64_Random;
 	} else if(strcmp(workload, "Triad") == 0) {
 		execute = &STREAM_Triad;
+	} else if(strcmp(workload, "ReadWrite64Random") == 0) {
+		execute = &STREAM_ReadWrite64_Random;
 	} else {
 		printf("Unknown workload\n");
 		exit(-1);

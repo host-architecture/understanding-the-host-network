@@ -67,6 +67,10 @@ filepath= os.path.join(STATS_PATH, args.config + '.pcm-imc.txt')
 if os.path.isfile(filepath):
     ss.load_pcm_raw(filepath)
 
+filepath= os.path.join(STATS_PATH, args.config + '.pcm-wpq.txt')
+if os.path.isfile(filepath):
+    ss.load_pcm_raw(filepath)
+
 filepath= os.path.join(STATS_PATH, args.config + '.pcm-modes.txt')
 if os.path.isfile(filepath):
     ss.load_pcm_raw(filepath)
@@ -88,6 +92,18 @@ if os.path.isfile(filepath):
         ss.load_pcm_raw(filepath)
 
 filepath= os.path.join(STATS_PATH, args.config + '.pcm-cha3.txt')
+if os.path.isfile(filepath):
+            ss.load_pcm_raw(filepath)
+
+filepath= os.path.join(STATS_PATH, args.config + '.pcm-cha4.txt')
+if os.path.isfile(filepath):
+            ss.load_pcm_raw(filepath)
+
+filepath= os.path.join(STATS_PATH, args.config + '.pcm-cha5.txt')
+if os.path.isfile(filepath):
+            ss.load_pcm_raw(filepath)
+
+filepath= os.path.join(STATS_PATH, args.config + '.pcm-cha6.txt')
 if os.path.isfile(filepath):
             ss.load_pcm_raw(filepath)
 

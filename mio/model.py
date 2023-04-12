@@ -1,4 +1,5 @@
 from .stats import *
+from scipy.stats import binom
 
 NUM_CHANNELS = 2
 T_CAS = 14.32
@@ -17,6 +18,8 @@ T_FAW = 21.14
 T_Switch = 8.18
 T_Write = 2.73
 T_Read = 2.73
+T_CWL = 13.64
+T_WR = 15
 # T_Write = 5.0
 NBa = 32
 NRa = 2
@@ -60,6 +63,18 @@ def query(ss, model_name, model_metric, filters):
         compute_writelat(ss, res, filters, CONST_WRITE_CPU, agent='cpu', sched='rr*', xpr='adj', pfillfactor=2)
     elif model_name == 'writelatcpu12':
         compute_writelat(ss, res, filters, CONST_WRITE_CPU, agent='cpu', sched='sq*', xpr='adj')
+    elif model_name == 'writelatio42':
+        compute_writelat(ss, res, filters, CONST_WRITE_IO, agent='io', sched='enlightenment', xpr='adj')
+    elif model_name == 'writelatio43':
+        compute_writelat(ss, res, filters, CONST_WRITE_IO, agent='io', sched='enlightenment', xpr='def')
+    elif model_name == 'writelatio44':
+        compute_writelat(ss, res, filters, CONST_WRITE_IO, agent='io', sched='enlightenment', xpr='ub')
+    elif model_name == 'writelatio45':
+        compute_writelat(ss, res, filters, CONST_WRITE_IO, agent='io', sched='enlightenment', xpr='bib')
+    elif model_name == 'writelatio46':
+        compute_writelat(ss, res, filters, CONST_WRITE_IO, agent='io', sched='enlightenment', xpr='adj', pfilloverride=1.0)
+    elif model_name == 'writelatio47':
+        compute_writelat(ss, res, filters, CONST_WRITE_IO, agent='io', sched='enlightenment', xpr='adj', pfillmetric='pfillwpq34')
     else:
         raise Exception('Unknown model name')
 
@@ -97,7 +112,7 @@ def compute_readlat(ss, d, filters, const):
     d['remainder'] = remainder
 
 
-def compute_writelat(ss, d, filters, const, agent='cpu', sched='sq', xpr='def', pfillfactor=1.0):
+def compute_writelat(ss, d, filters, const, agent='cpu', sched='sq', xpr='def', pfillfactor=1.0, pfilloverride=None, pfillmetric=None):
 
     switches = ss.query('wmm_to_rmm', agg_space='sum', filter=filters['channels'])[0]
     lines_read = (ss.query('memreadbw', agg_space='sum', filter=filters['channels'])[0] * 1e6) / 64.0
@@ -109,6 +124,9 @@ def compute_writelat(ss, d, filters, const, agent='cpu', sched='sq', xpr='def', 
     lfb_sum = ss.query('fb_occupancy', agg_space='sum', filter=filters['cores'])[0]
     iio_occ = ss.query('irp_write_occupancy', agg_space='sum', filter=filters['irps'])[0] / ss.query('irp_cycles', agg_space='avg', filter=filters['irps'])[0]
     rpq_occupancy_total = ss.query('rpq_occupancy', agg_space='sum', filter=filters['channels'])[0]
+    wbmtoi_occ = ss.query('wbmtoi_occupancy', agg_space='sum', filter=filters['chas'])[0]
+    blemon_occ = ss.query('blemon_occupancy', agg_space='sum', filter=filters['chas'])[0]
+    pfillwpq34 = ss.query('pfillwpq34', agg_space='avg', filter=['SKT3CHAN0'])[0]
 
     res = 0.0
 
@@ -118,6 +136,10 @@ def compute_writelat(ss, d, filters, const, agent='cpu', sched='sq', xpr='def', 
     pre_conflict_write = float(pre_conflict)*((float(write_acts))/float(read_acts + write_acts))
     rowmiss = (float(write_acts)/float(lines_written))*T_ACT + (float(pre_conflict_write)/float(lines_written))*T_PRE
     pfillwpq = pfillfactor*(float(write_no_credits)/float(lines_written))
+    if pfillmetric == 'pfillwpq34':
+        pfillwpq = pfillwpq34
+    if pfilloverride:
+        pfillwpq = pfilloverride
 
     #res += pfillwpq*(float(nagents)/2)*(switching + readhol + rowmiss)
     # res += pfillwpq*(CONST_CREDIT_PROP + ((0.5*(lfb_sum + iio_occ))/NUM_CHANNELS)*(switching + readhol + rowmiss))
@@ -150,6 +172,8 @@ def compute_writelat(ss, d, filters, const, agent='cpu', sched='sq', xpr='def', 
             avg_waiting = ((ncores + 1)*(rpq_occupancy_total/ncores))
         else:
             avg_waiting = ((ncores + 1)*iio_occ)
+    elif sched == 'enlightenment':
+        avg_waiting = wbmtoi_occ + blemon_occ
     else:
         raise Exception('Unknown sched')
 
@@ -157,10 +181,27 @@ def compute_writelat(ss, d, filters, const, agent='cpu', sched='sq', xpr='def', 
         res += pfillwpq*(CONST_CREDIT_PROP + (avg_waiting/NUM_CHANNELS)*(switching + readhol + rowmiss))
     elif xpr == 'adj':
         res += pfillwpq*(CONST_CREDIT_PROP + (avg_waiting/NUM_CHANNELS)*(switching + readhol + T_Trans) + rowmiss)
+    elif xpr == 'ub':
+        res += pfillwpq*(avg_waiting/NUM_CHANNELS)*(switching + readhol + T_Trans + (float(write_acts)/float(lines_written))*(T_ACT + T_PRE + T_CWL + T_WR)*0.15)
+    elif xpr == 'bib':
+        maxexpr = 0
+        Nwaiting = avg_waiting/NUM_CHANNELS
+        n = max(0, round(Nwaiting))
+        x = 0
+        while x <= n:
+            ba_comp = (float(pre_conflict_write)/float(lines_written))*T_PRE 
+            ba_comp += (float(write_acts)/float(lines_written))*(x*T_ACT + x*T_CWL + x*T_Trans + x*T_WR + T_ACT)
+            ch_comp = Nwaiting * T_Trans
+            prob = float((binom.pmf(x, n, 1.0/float(NBa))))
+            val = prob * max(ba_comp, ch_comp)
+            maxexpr += val
+            x += 1
+        res += pfillwpq*(Nwaiting*switching + Nwaiting*readhol + maxexpr)
     # res += pfillwpq*(switching + readhol + rowmiss)
 
     d['latency'] = const + res
     d['ad'] = res
-    d['switching'] = switching
-    d['readhol'] = readhol
-    d['rowmiss'] = rowmiss
+    d['switching'] = pfillwpq*(avg_waiting/NUM_CHANNELS)*switching
+    d['readhol'] = pfillwpq*(avg_waiting/NUM_CHANNELS)*readhol
+    d['rowmiss'] = pfillwpq*rowmiss
+    d['writehol'] = pfillwpq*(avg_waiting/NUM_CHANNELS)*T_Trans

@@ -43,6 +43,13 @@
 #define NUMA2_CORE 30
 #define NUMA3_CORE 31
 
+// Filter1 values for transactions
+// DRd: 0x40433
+// WbEFtoI: 0x48c33
+// WbMtoI: 0x48833
+// ItoM: 0x49033
+// BlackLemon(0x218): 0x43033
+
 
 int TSC_ratio;
 
@@ -116,7 +123,7 @@ int main(int argc, char** argv){
 
     if(argc < 2) {
         printf("Insufficient arguments\n");
-        printf("USAGE: ./sample_cha <event> [filter0] [filter1]\n");
+        printf("USAGE: ./sample_cha <event> [opcode]\n");
         return EXIT_FAILURE;
     }
 
@@ -125,13 +132,21 @@ int main(int argc, char** argv){
     uint64_t cha_filter1 = 0x0000003B;
 
     sscanf(argv[1], "%lx", &cha_event);
+    // if(argc >= 3) {
+    //     sscanf(argv[2], "%lx", &cha_filter0);
+    // }
+    // if(argc >= 4) {
+    //     sscanf(argv[3], "%lx", &cha_filter1);
+    // }
     if(argc >= 3) {
-        sscanf(argv[2], "%lx", &cha_filter0);
+        // opcode filtering
+        uint64_t opc0;
+        sscanf(argv[2], "%lx", &opc0);
+        cha_filter1 = (0x00000033 | (opc0 << 9));
+        uint64_t opc1 = 0x218; // Black lemon
+        cha_filter1 = (cha_filter1 | (opc1 << 19)); 
+        printf("Filter1: 0x%lx\n", cha_filter1);
     }
-    if(argc >= 4) {
-        sscanf(argv[3], "%lx", &cha_filter1);
-    }
-    
 
     int cpu = get_core_number();
     // fprintf(log_file,"Core no: %d\n",cpu);

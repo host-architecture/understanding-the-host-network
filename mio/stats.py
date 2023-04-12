@@ -3,6 +3,9 @@ import os, sys, re, subprocess, glob
 MAX_SSDS = 8
 FIO_STATS_PATH = '/home/midhul/membw-eval'
 
+CHA_FREQ = 2.4*1e9
+IMC_FREQ_PRAC = 1463000000.0
+
 class StatStore:
     def __init__(self):
         self.d = {}
@@ -34,7 +37,21 @@ class StatStore:
             'lines_read': (lambda x: (x - 228.5)*1e6/64, ['memreadbw']),
             'pre_conflict_read': (lambda x, y, z: (x*z)/(x+y), ['pre_miss', 'pre_close', 'pre_rd']),
             'acts_read_total': (lambda x, y: x + 4, ['acts_read', 'acts_byp']),
-            'lines_written': (lambda x: x*1e6/64, ['memwritebw'])
+            'lines_written': (lambda x: x*1e6/64, ['memwritebw']),
+            'drd_occupancy': (lambda x: x/CHA_FREQ, ['drd_occ_agg']),
+            'drd_latency': (lambda x, y: x*1e9/y, ['drd_occupancy', 'drd_inserts']),
+            'wbeftoi_occupancy': (lambda x: x/CHA_FREQ, ['wbeftoi_occ_agg']),
+            'wbeftoi_latency': (lambda x, y: x*1e9/y, ['wbeftoi_occupancy', 'weftoi_inserts']),
+            'wbmtoi_occupancy': (lambda x: x/CHA_FREQ, ['wbmtoi_occ_agg']),
+            'wbmtoi_latency': (lambda x, y: x*1e9/y, ['wbmtoi_occupancy', 'wbmtoi_inserts']),
+            'itom_occupancy': (lambda x: x/CHA_FREQ, ['itom_occ_agg']),
+            'itom_latency': (lambda x, y: x*1e9/(y+0.0000000000005), ['itom_occupancy', 'itom_inserts']),
+            'blemon_occupancy': (lambda x: x/CHA_FREQ, ['blemon_occ_agg']),
+            'blemon_latency': (lambda x, y: x*1e9/(y+0.0000000000005), ['blemon_occupancy', 'blemon_inserts']),
+            'pfillwpq30': (lambda x: x/IMC_FREQ_PRAC, ['wpq_occ_gte30']),
+            'pfillwpq32': (lambda x: x/IMC_FREQ_PRAC, ['wpq_occ_gte32']),
+            'pfillwpq34': (lambda x: x/IMC_FREQ_PRAC, ['wpq_occ_gte34']),
+            'pfillwpq36': (lambda x: x/IMC_FREQ_PRAC, ['wpq_occ_gte36'])
         }
 
         # IceLake
