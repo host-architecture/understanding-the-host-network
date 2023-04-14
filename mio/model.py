@@ -33,6 +33,8 @@ def query(ss, model_name, model_metric, filters):
     res = {}
     if model_name == 'readlatcpu':
         compute_readlat(ss, res, filters, CONST_READ_CPU)
+    elif model_name == 'readlatcpuadj':
+        compute_readlat(ss, res, filters, CONST_READ_CPU, adj_pfillrpq=True)
     elif model_name == 'writelatio':
         compute_writelat(ss, res, filters, CONST_WRITE_IO, agent='io', sched='sq')
     elif model_name == 'writelatcpu':
@@ -83,7 +85,7 @@ def query(ss, model_name, model_metric, filters):
 
     return [res[model_metric]]
 
-def compute_readlat(ss, d, filters, const):
+def compute_readlat(ss, d, filters, const, adj_pfillrpq=False):
 
     rpq_occupancy = ss.query('rpq_occupancy', agg_space='avg', filter=filters['channels'])[0]
     switches = ss.query('wmm_to_rmm', agg_space='sum', filter=filters['channels'])[0]
@@ -92,6 +94,13 @@ def compute_readlat(ss, d, filters, const):
     pre_conflict = ss.query('pre_miss', agg_space='sum', filter=filters['channels'])[0]
     read_acts = ss.query('acts_read', agg_space='sum', filter=filters['channels'])[0] + ss.query('acts_byp', agg_space='sum', filter=filters['channels'])[0]
     write_acts = ss.query('acts_write', agg_space='sum', filter=filters['channels'])[0]
+
+    if adj_pfillrpq:
+        pfillrpq = ss.query('pfillrpq42', agg_space='avg', filter=filters['channels'])[0]
+        rdcur_occupancy = ss.query('rdcur_occupancy', agg_space='sum', filter=filters['chas'])[0]
+        drd_occupancy = ss.query('drd_occupancy', agg_space='sum', filter=filters['chas'])[0]
+        nwaiting = rdcur_occupancy + drd_occupancy
+        rpq_occupancy = (1-pfillrpq)*rpq_occupancy + pfillrpq*(nwaiting/NUM_CHANNELS)
 
     res = 0.0
 

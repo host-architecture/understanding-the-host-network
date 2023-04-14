@@ -48,10 +48,16 @@ class StatStore:
             'itom_latency': (lambda x, y: x*1e9/(y+0.0000000000005), ['itom_occupancy', 'itom_inserts']),
             'blemon_occupancy': (lambda x: x/CHA_FREQ, ['blemon_occ_agg']),
             'blemon_latency': (lambda x, y: x*1e9/(y+0.0000000000005), ['blemon_occupancy', 'blemon_inserts']),
+            'rdcur_occupancy': (lambda x: x/CHA_FREQ, ['rdcur_occ_agg']),
+            'rdcur_latency': (lambda x, y: x*1e9/(y+0.0000000000005), ['rdcur_occupancy', 'rdcur_inserts']),
             'pfillwpq30': (lambda x: x/IMC_FREQ_PRAC, ['wpq_occ_gte30']),
             'pfillwpq32': (lambda x: x/IMC_FREQ_PRAC, ['wpq_occ_gte32']),
             'pfillwpq34': (lambda x: x/IMC_FREQ_PRAC, ['wpq_occ_gte34']),
-            'pfillwpq36': (lambda x: x/IMC_FREQ_PRAC, ['wpq_occ_gte36'])
+            'pfillwpq36': (lambda x: x/IMC_FREQ_PRAC, ['wpq_occ_gte36']),
+            'pfillrpq38': (lambda x: x/IMC_FREQ_PRAC, ['rpq_occ_gte38']),
+            'pfillrpq40': (lambda x: x/IMC_FREQ_PRAC, ['rpq_occ_gte40']),
+            'pfillrpq42': (lambda x: x/IMC_FREQ_PRAC, ['rpq_occ_gte42']),
+            'pfillrpq44': (lambda x: x/IMC_FREQ_PRAC, ['rpq_occ_gte44'])
         }
 
         # IceLake

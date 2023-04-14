@@ -143,7 +143,8 @@ int main(int argc, char** argv){
         uint64_t opc0;
         sscanf(argv[2], "%lx", &opc0);
         cha_filter1 = (0x00000033 | (opc0 << 9));
-        uint64_t opc1 = 0x218; // Black lemon
+        // uint64_t opc1 = 0x218; // Black lemon
+        uint64_t opc1 = 0;
         cha_filter1 = (cha_filter1 | (opc1 << 19)); 
         printf("Filter1: 0x%lx\n", cha_filter1);
     }
