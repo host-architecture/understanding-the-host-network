@@ -44,6 +44,8 @@ class StatStore:
             'wbeftoi_latency': (lambda x, y: x*1e9/y, ['wbeftoi_occupancy', 'weftoi_inserts']),
             'wbmtoi_occupancy': (lambda x: x/CHA_FREQ, ['wbmtoi_occ_agg']),
             'wbmtoi_latency': (lambda x, y: x*1e9/y, ['wbmtoi_occupancy', 'wbmtoi_inserts']),
+            'pwbmtoi_occupancy': (lambda x: x/CHA_FREQ, ['pwbmtoi_occ_agg']),
+            'pwbmtoi_latency': (lambda x, y: x*1e9/(y+0.0000000000005), ['pwbmtoi_occupancy', 'pwbmtoi_inserts']),
             'itom_occupancy': (lambda x: x/CHA_FREQ, ['itom_occ_agg']),
             'itom_latency': (lambda x, y: x*1e9/(y+0.0000000000005), ['itom_occupancy', 'itom_inserts']),
             'blemon_occupancy': (lambda x: x/CHA_FREQ, ['blemon_occ_agg']),

@@ -119,6 +119,10 @@ filepath= os.path.join(STATS_PATH, args.config + '.pcm-cha7.txt')
 if os.path.isfile(filepath):
             ss.load_pcm_raw(filepath)
 
+filepath= os.path.join(STATS_PATH, args.config + '.pcm-cha8.txt')
+if os.path.isfile(filepath):
+                ss.load_pcm_raw(filepath)
+
 filepath= os.path.join(STATS_PATH, args.config + '.pcm-mesh1.txt')
 if os.path.isfile(filepath):
                 ss.load_pcm_raw(filepath)

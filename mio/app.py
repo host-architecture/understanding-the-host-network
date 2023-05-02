@@ -45,6 +45,7 @@ events_group_17 = {'wbmtoi_occ_agg': 'cha/config=0x0000000000403136,config2=0x48
 events_group_18 = {'itom_occ_agg': 'cha/config=0x0000000000403436,config2=0x49033', 'itom_inserts': 'cha/config=0x0000000000403435,config2=0x49033'}
 events_group_19 = {'blemon_occ_agg': 'cha/config=0x0000000000403436,config2=0x43033', 'blemon_inserts': 'cha/config=0x0000000000403435,config2=0x43033'}
 events_group_23 = {'rdcur_occ_agg': 'cha/config=0x0000000000403436,config2=0x43c33', 'rdcur_inserts': 'cha/config=0x0000000000403435,config2=0x43c33'}
+events_group_24 = {'pwbmtoi_occ_agg': 'cha/config=0x0000000000403436,config2=0x48833', 'pwbmtoi_inserts': 'cha/config=0x0000000000403435,config2=0x48833'}
 
 # Events for PFillWPQ
 events_group_20 = {'wpq_occ_gte34': 'imc/config=0x22400081', 'wpq_occ_gte30': 'imc/config=0x1e400081', 'wpq_occ_gte32': 'imc/config=0x20400081', 'wpq_occ_gte36': 'imc/config=0x24400081'}
@@ -239,6 +240,7 @@ def run_benchmark(args, env):
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha5.txt'%(prefix, num_cores)), events_group_18, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha6.txt'%(prefix, num_cores)), events_group_19, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha7.txt'%(prefix, num_cores)), events_group_23, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha8.txt'%(prefix, num_cores)), events_group_24, RECORD_DURATION)
         #pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l1.txt'%(prefix, num_cores)), events_group_1, RECORD_DURATION)
         #pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l2l3.txt'%(prefix, num_cores)), events_group_2, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-imc.txt'%(prefix, num_cores)), events_group_3, RECORD_DURATION)
