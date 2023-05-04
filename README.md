@@ -31,7 +31,7 @@ sudo python3 -m mio c2m-iso --ant_num_cores 1 --ant_mem_numa 3 --ant stream --an
 
 Running P2M Application (fio) in isolation:
 ```
-sudo python3 -m mio p2miso --fio --fio_mem_numa 3 --fio_cpus 3,7 --fio_writefrac 0 --fio_iosize $((8*1024*1024)) --fio_iodepth 64 --fio_num_ssds 4 --fio_duration 120
+sudo python3 -m mio p2m-iso --fio --fio_mem_numa 3 --fio_cpus 3,7 --fio_writefrac 0 --fio_iosize $((8*1024*1024)) --fio_iodepth 64 --fio_num_ssds 4 --fio_duration 120
 ```
 
 Colocate C2M and P2M application:
