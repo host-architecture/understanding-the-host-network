@@ -38,3 +38,8 @@ Colocate C2M and P2M application:
 ```
 sudo python3 -m mio c2m-p2m --ant_num_cores 1 --ant_mem_numa 3 --ant stream --ant_writefrac 0 --ant_inst_size 64 --ant_duration 120 --fio --fio_mem_numa 3 --fio_cpus 3,7 --fio_writefrac 0 --fio_iosize $((8*1024*1024)) --fio_iodepth 64 --fio_num_ssds 4 --sync_durations --stats
 ```
+
+Collect/query statistics from the above run (average LFB latency and average RPQ occupancy in this example):
+```
+python3 collect_stats.py c2m-p2m-cores1 core:l1_miss_latency:avg,imc:rpq_occupancy:avg
+```
