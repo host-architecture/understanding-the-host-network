@@ -6,7 +6,7 @@
 * **Deeper analysis**: `mio` additionally provides tools for deeper analysis of the measured low-level metrics. In particular, it can connect memory controller level measurements to the observed end-to-end memory access latency inflation using a novel analytical formula which is very useful for explaining the impact of main memory contention on application performance (this feature is currently supported on Intel Cascade Lake platforms).
 
 ## Applications
-`mio` supports two kinds of applications: (1) Applications on CPU cores, which generate CPU core to memory traffic (which we call C2M applications) and (2) Applications which generate Peripheral to memory traffic (which we call P2M applications) through DMAs from Peripheral devices such as SSDs, NICs adn GPUs. `mio` currently supports the following applications:
+`mio` supports two kinds of applications: (1) Applications on CPU cores, which generate CPU core to memory traffic (which we call C2M applications) and (2) Applications which generate Peripheral to memory traffic (which we call P2M applications) through DMAs from Peripheral devices such as SSDs, NICs and GPUs. `mio` currently supports the following applications:
 
 C2M Applications:
 * Redis: A popular in-memory key-value store.
