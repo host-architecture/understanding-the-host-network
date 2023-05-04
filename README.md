@@ -21,3 +21,20 @@ P2M Applications:
 Extending `mio` to support other applications is easy --- one simply needs write a wrapper that implements the `MemoryAntagonist` interface.
 
 ## Usage
+
+Make sure to configure `config.json` correctly based on your setup
+
+Running C2M Application (STREAM*) in isolation:
+```
+sudo python3 -m mio c2m-iso --ant_num_cores 1 --ant_mem_numa 3 --ant stream --ant_writefrac 0 --ant_inst_size 64 --ant_duration 120
+```
+
+Running P2M Application (fio) in isolation:
+```
+sudo python3 -m mio p2miso --fio --fio_mem_numa 3 --fio_cpus 3,7 --fio_writefrac 0 --fio_iosize $((8*1024*1024)) --fio_iodepth 64 --fio_num_ssds 4 --fio_duration 120
+```
+
+Colocate C2M and P2M application:
+```
+sudo python3 -m mio c2m-p2m --ant_num_cores 1 --ant_mem_numa 3 --ant stream --ant_writefrac 0 --ant_inst_size 64 --ant_duration 120 --fio --fio_mem_numa 3 --fio_cpus 3,7 --fio_writefrac 0 --fio_iosize $((8*1024*1024)) --fio_iodepth 64 --fio_num_ssds 4 --sync_durations --stats
+```
