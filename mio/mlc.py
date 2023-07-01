@@ -24,7 +24,7 @@ class MLCRunner(Antagonist):
         out_f = open(self.output_path, 'w')
         # $MLC_PATH/mlc --loaded_latency -T -d0 -e -k$cores_str -j0 -b1g -t$duration $workload $avx512flag
         cores_str = ','.join([str(x) for x in self.cores])
-        args = [self.mlc_path, '--loaded_latency', '-T', '-d0', '-e', '-k' + cores_str, '-j' + str(self.mem_numa), '-b1g', '-t' + str(duration)]
+        args = [self.mlc_path, '--loaded_latency', '-T', '-d0', '-e', '-k' + cores_str, '-j' + str(self.mem_numa), '-b500m', '-t' + str(duration)]
         
         if self.write_frac == 0:
             args.append('-R')
