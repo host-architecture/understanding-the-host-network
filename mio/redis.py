@@ -22,11 +22,15 @@ class RedisRunner(Antagonist):
         self.value_size = 1024
         self.pipeline = 32
         #self.client_cores = [0,4,8,12,16,20,24,28]
-        self.client_cores = [23,27,31]
-        self.client_numa = 3
+        self.client_cores = [35,37,39,41,43,45,47,49,51,53,55,57,59,61,63]
+        self.client_numa = 1
 
         self.procs = [] # This is for clients
         self.server_procs = [] # this is for servers
+        
+        os.system('pkill -9 -f redis-server')
+        time.sleep(5)
+        os.system('rm -f /tmp/redis.sock*')
 
         # TODO disable THP etc. before starting redis
 
@@ -40,7 +44,7 @@ class RedisRunner(Antagonist):
         # print('redis servers started')
 
         # Wait for servers to startup
-        time.sleep(3)
+        time.sleep(10)
 
 
         # Fill servers with data
@@ -53,6 +57,8 @@ class RedisRunner(Antagonist):
 
         for p in memtier_procs:
             p.wait()
+
+        time.sleep(3)
 
         # print('memtier complete')
         
@@ -69,6 +75,8 @@ class RedisRunner(Antagonist):
     def wait(self):
         for p in self.procs:
             p.wait()
+        for p in self.server_procs:
+            p.kill()
 
     def cleanup(self):
         for p in self.procs:
