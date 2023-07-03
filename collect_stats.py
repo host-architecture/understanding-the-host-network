@@ -37,6 +37,7 @@ parser.add_argument('--filter_chas', help='List of CHAs to filter metrics on', d
 parser.add_argument('--filter_irps', help='List of IRPs to filter metrics on', default='SKT3IRP1,SKT3IRP2')
 default_ssds = ['SSD%d'%(i) for i in range(len(env.get_ssds()))]
 parser.add_argument('--filter_ssds', help='List of SSDs to filter metrics on', default=','.join(default_ssds))
+parser.add_argument('--filter_upi_links', help='List of UPI links to filter on', default=','.join(env.get_upi_links()))
 parser.add_argument('--model', help='Apply model')
 
 args = parser.parse_args(sys.argv[1:])
@@ -143,6 +144,10 @@ filepath= os.path.join(STATS_PATH, args.config + '.pcm-irp2.txt')
 if os.path.isfile(filepath):
     ss.load_pcm_raw(filepath)
 
+filepath= os.path.join(STATS_PATH, args.config + '.pcm-upi.txt')
+if os.path.isfile(filepath):
+    ss.load_pcm_raw(filepath)
+
 filepath= os.path.join(STATS_PATH, args.config + '.stream.txt')
 if len(glob.glob(filepath + '-core*')) > 0:
     ss.load_stream(filepath)
@@ -183,6 +188,7 @@ filter_channels = args.filter_channels.split(',')
 filter_chas = args.filter_chas.split(',')
 filter_irps = args.filter_irps.split(',')
 filter_io = args.filter_ssds.split(',')
+filter_upi_links = args.filter_upi_links.split(',')
 
 cols = args.columns.split(',')
 res = []
@@ -199,7 +205,8 @@ for col in cols:
             'channels': filter_channels,
             'chas': filter_chas,
             'irps': filter_irps,
-            'io': filter_io
+            'io': filter_io,
+            'upi': filter_upi_links
         }
 
         res += model.query(ss, model_name, model_metric, filters)
@@ -219,6 +226,8 @@ for col in cols:
             metric_filter = filter_irps
         elif metric_type == 'io':
             metric_filter = filter_io
+        elif metric_type == 'upi':
+            metric_filter = filter_upi_links
 
         res += ss.query(metric, agg_space=metric_agg, agg_time=args.agg_time, filter=metric_filter)
 

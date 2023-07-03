@@ -18,6 +18,7 @@ class Environment:
         self.gapbs_path = None
         self.ssds = None
         self.mem_channels = None
+        self.upi_links = None
 
         if 'MLC_PATH' in config_dict:
             self.mlc_path = config_dict['MLC_PATH']
@@ -62,6 +63,9 @@ class Environment:
 
         if 'SSDS' in config_dict:
             self.ssds = config_dict['SSDS']
+        
+        if 'UPI_LINKS' in config_dict:
+            self.upi_links = config_dict['UPI_LINKS']
 
         if 'MEM_CHANNELS' in config_dict:
             self.mem_channels = config_dict['MEM_CHANNELS']
@@ -154,6 +158,11 @@ class Environment:
         if not self.ssds:
             raise Exception('SSDS config not found')
         return self.ssds
+    
+    def get_upi_links(self):
+        if not self.upi_links:
+            raise Exception('SSDS config not found')
+        return self.upi_links
 
     def get_mem_channels(self):
         if not self.mem_channels:

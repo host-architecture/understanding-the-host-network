@@ -59,6 +59,7 @@ events_group_22 = {'rpq_occ_gte40': 'imc/config=0x28400080', 'rpq_occ_gte42': 'i
 # events_group_1 = {'load_l1_hits': 'core/config=0x00000000004301d1', 'load_l1_misses': 'core/config=0x00000000004308d1', 'load_l1_fbhit': 'core/config=0x00000000004340d1', 'loads': 'core/config=0x00000000004381d0'}
 # events_group_2 = {'load_l2_hits': 'core/config=0x00000000004302d1', 'load_l2_misses': 'core/config=0x00000000004310d1', 'load_l3_hits': 'core/config=0x00000000004304d1', 'load_l3_misses': 'core/config=0x00000000004320d1'}
 # events_group_3 = {'rpq_occ_agg': 'imc/config=0x0000000000400080', 'rpq_occ_agg1': 'imc/config=0x0000000000400081', 'wpq_occ_agg': 'imc/config=0x000000000040082', 'wpq_occ_agg1': 'imc/config=0x000000000040083'}
+events_group_101 = {'rxl_flits_nondata': 'upi/config=0x0000000000409703', 'rxl_flits_data': 'upi/config=0x0000000000400f03', 'txl_flits_nondata': 'upi/config=0x0000000000409702', 'txl_flits_data': 'upi/config=0x0000000000400f02'}
 
 # SSD = ['/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1', '/dev/nvme6n1', '/dev/nvme7n1']
 # SSD = ['/dev/nvme0n1', '/dev/nvme1n1', '/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1']
@@ -260,6 +261,14 @@ def run_benchmark(args, env):
         pcm_mem = PcmMemoryRunner(env.get_pcm_path())
         time.sleep(WARMUP_DURATION)
         pcm_mem.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-memory.txt'%(prefix, num_cores)), RECORD_DURATION)
+    elif args.stats_upi:
+        pcm_mem = PcmMemoryRunner(env.get_pcm_path())
+        time.sleep(WARMUP_DURATION)
+        pcm_mem.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-memory.txt'%(prefix, num_cores)), RECORD_DURATION)
+        pcm_latency = PcmLatencyRunner(env.get_pcm_path())
+        pcm_latency.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-latency.txt'%(prefix, num_cores)), RECORD_DURATION)
+        pcm_raw = PcmRawRunner(env.get_pcm_path())
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-upi.txt'%(prefix, num_cores)), events_group_101, RECORD_DURATION)
     elif args.stats_single:
         # pcm_raw = PcmRawRunner(env.get_pcm_path())
         time.sleep(WARMUP_DURATION)
@@ -338,6 +347,7 @@ def main(argv=[]):
     parser.add_argument('--stats', help='Record stats', action='store_true')
     parser.add_argument('--stats_membw', help='Record membw stats', action='store_true')
     parser.add_argument('--stats_cpuutil', help='Record CPU utilization stats', action='store_true')
+    parser.add_argument('--stats_upi', help='Record upi stats', action='store_true')
     parser.add_argument('--disable_prefetch', help='Disable prefetchers', action='store_true')
     parser.add_argument('--disable_prefetch_l1', help='Disable L1 prefetchers', action='store_true')
     parser.add_argument('--fio', help='Run fio', action='store_true')

@@ -1,5 +1,5 @@
 {
-    "MLC_PATH": "/home/midhul/mlc/Linux",
+    "MLC_PATH": "/home/midhul/Linux",
     "PCM_PATH": "/home/midhul/pcm/build/bin",
     "STATS_PATH": "/home/midhul/membw-eval",
     "FIO_PATH": "/home/midhul/fio",
@@ -8,9 +8,9 @@
     "MEMTIER_PATH": "/home/midhul/memtier_benchmark",
     "MMAPBENCH_PATH": "/home/midhul/mio/mmapbench",
     "GAPBS_PATH": "/home/midhul/gapbs",
-    "NUMA_CORES": ["0,4,8,12,16,20,24,28", "1,5,9,13,17,21,25,29", "2,6,10,14,18,22,26,30", "3,7,11,15,19,23,27,31"],
-    "NUMA_ORDER": "3,0,1,2",
-    "SSDS": ["/dev/nvme0n1", "/dev/nvme1n1", "/dev/nvme2n1", "/dev/nvme3n1", "/dev/nvme4n1", "/dev/nvme5n1"],
-    "SSDScomment": ["/dev/nvme2n1", "/dev/nvme3n1"],
-    "MEM_CHANNELS": ["SKT3CHAN0", "SKT3CHAN3"] 
+    "NUMA_CORES": ["0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62", "1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59,61,63"],
+    "NUMA_ORDER": "1,0",
+    "SSDS": ["/dev/sda", "/dev/sdb", "/dev/sdc", "/dev/sdd", "/dev/sdf", "/dev/sdg", "/dev/sdh", "/dev/sdi"],
+    "MEM_CHANNELS": ["SKT1CHAN0", "SKT1CHAN2", "SKT1CHAN4", "SKT1CHAN6"],
+    "UPI_LINKS": ["SKT1LINK0", "SKT1LINK1", "SKT1LINK2"] 
 }
