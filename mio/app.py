@@ -86,6 +86,16 @@ def run_benchmark(args, env):
     numa_order = [int(x) for x in args.ant_numa_order.split(',')]
     ant_duration = args.ant_duration
 
+    mem_numa_list = None
+    if args.ant_mem_numa_list:
+        mem_numa_list = []
+        for el in args.ant_mem_numa_list.split(','):
+            node = int(el.split(':')[0])
+            rep = int(el.split(':')[1])
+            for i in range(rep):
+                mem_numa_list.append(node)
+
+
     if args.ant and args.stats and ant_duration <= WARMUP_DURATION + RECORD_DURATION*RECORD_GROUPS:
         raise Exception('Antagonist Duration too small for measuring all stats')
 
@@ -136,6 +146,9 @@ def run_benchmark(args, env):
         ant_opts = {}
         if args.ant_chunksize:
             ant_opts['chunk_size'] = args.ant_chunksize
+
+        if mem_numa_list:
+            ant_opts['mem_numa_list'] = mem_numa_list
 
         if args.sync_durations:
             ant_opts['warmup_duration'] = ANT_WARMUP_DURATION
@@ -336,6 +349,7 @@ def main(argv=[]):
     parser.add_argument('--ant_cpus', help='List of CPUs to run antagonist on')
     parser.add_argument('--ant_num_cores', help='Number of cores to run antagonist on', default='1')
     parser.add_argument('--ant_mem_numa', help='NUMA node to allocate antagonist memory on', type=int, default=default_numa)
+    parser.add_argument('--ant_mem_numa_list', help='List of NUMA nodes to allocate antagonist memory on. Example: 0:10,1:6 means memory for 10 cores on NUMA 0 and memory for 6 cores on NUMA 1')
     parser.add_argument('--ant_numa_order', help='Order of NUMA nodes to use for antagonist', default=','.join([str(x) for x in env.get_numa_order()]))
     parser.add_argument('--ant_inst_size', help='Instruction size for antagonist', type=int)
     parser.add_argument('--ant_pattern', help='Antagonist access pattern')

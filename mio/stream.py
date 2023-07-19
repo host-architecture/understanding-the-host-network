@@ -9,7 +9,10 @@ class STREAMRunner(Antagonist):
     def init(self, output_path, cores, mem_numa, opts):
         self.output_path = output_path
         self.cores = cores
-        self.mem_numa = mem_numa
+        if 'mem_numa_list' in opts:
+            self.mem_numa = opts['mem_numa_list']
+        else:
+            self.mem_numa = [mem_numa for _ in range(len(cores))]
         self.opts = opts
 
         # Default parameters
@@ -21,11 +24,12 @@ class STREAMRunner(Antagonist):
         self.procs = []
 
     def run(self, duration):
+        idx = 0
         for i in self.cores:
             out_f = open(self.output_path + ('-core%d'%(i)), 'w')
         # numactl --membind 3 --physcpubind 3 ./stream Read16 10
             args = []
-            args += ['numactl', '--membind', str(self.mem_numa), '--physcpubind', str(i), self.stream_path]
+            args += ['numactl', '--membind', str(self.mem_numa[idx]), '--physcpubind', str(i), self.stream_path]
         
             workload_str = ''
             if self.write_frac == 0:
@@ -65,6 +69,7 @@ class STREAMRunner(Antagonist):
                 my_env['COOLDOWN_DURATION'] = str(self.opts['cooldown_duration'])
 
             self.procs.append(subprocess.Popen(args, stdout=out_f, stderr=subprocess.STDOUT, env=my_env))
+            idx += 1
 
     def wait(self):
         for p in self.procs:
