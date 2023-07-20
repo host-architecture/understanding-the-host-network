@@ -1,0 +1,1 @@
+cmd_/home/midhul/mio/kernel/sidemap/Module.symvers := sed 's/\.ko$$/\.o/' /home/midhul/mio/kernel/sidemap/modules.order | scripts/mod/modpost -m -a  -o /home/midhul/mio/kernel/sidemap/Module.symvers -e -i Module.symvers   -T -
