@@ -282,6 +282,7 @@ def run_benchmark(args, env):
         pcm_latency.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-latency.txt'%(prefix, num_cores)), RECORD_DURATION)
         pcm_raw = PcmRawRunner(env.get_pcm_path())
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-upi.txt'%(prefix, num_cores)), events_group_101, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha2.txt'%(prefix, num_cores)), events_group_15, RECORD_DURATION)
     elif args.stats_single:
         # pcm_raw = PcmRawRunner(env.get_pcm_path())
         time.sleep(WARMUP_DURATION)
