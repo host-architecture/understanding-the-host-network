@@ -61,6 +61,9 @@ events_group_22 = {'rpq_occ_gte40': 'imc/config=0x28400080', 'rpq_occ_gte42': 'i
 # events_group_3 = {'rpq_occ_agg': 'imc/config=0x0000000000400080', 'rpq_occ_agg1': 'imc/config=0x0000000000400081', 'wpq_occ_agg': 'imc/config=0x000000000040082', 'wpq_occ_agg1': 'imc/config=0x000000000040083'}
 events_group_101 = {'rxl_flits_nondata': 'upi/config=0x0000000000409703', 'rxl_flits_data': 'upi/config=0x0000000000400f03', 'txl_flits_nondata': 'upi/config=0x0000000000409702', 'txl_flits_data': 'upi/config=0x0000000000400f02'}
 
+events_group_201 = {'drd_occ_agg_local': 'cha/config=0x0000000000403136,config2=0x40432', 'drd_inserts_local': 'cha/config=0x0000000000403135,config2=0x40432'}
+events_group_202 = {'drd_occ_agg_remote': 'cha/config=0x0000000000403136,config2=0x40431', 'drd_inserts_remote': 'cha/config=0x0000000000403135,config2=0x40431'}
+
 # SSD = ['/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1', '/dev/nvme6n1', '/dev/nvme7n1']
 # SSD = ['/dev/nvme0n1', '/dev/nvme1n1', '/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1']
 # sdb, sdc, sde, sdh, sdi, sdj, sdk
@@ -282,7 +285,8 @@ def run_benchmark(args, env):
         pcm_latency.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-latency.txt'%(prefix, num_cores)), RECORD_DURATION)
         pcm_raw = PcmRawRunner(env.get_pcm_path())
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-upi.txt'%(prefix, num_cores)), events_group_101, RECORD_DURATION)
-        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha2.txt'%(prefix, num_cores)), events_group_15, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha2.txt'%(prefix, num_cores)), events_group_201, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha3.txt'%(prefix, num_cores)), events_group_202, RECORD_DURATION)
     elif args.stats_single:
         # pcm_raw = PcmRawRunner(env.get_pcm_path())
         time.sleep(WARMUP_DURATION)
