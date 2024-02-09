@@ -135,7 +135,7 @@ def compute_writelat(ss, d, filters, const, agent='cpu', sched='sq', xpr='def', 
     rpq_occupancy_total = ss.query('rpq_occupancy', agg_space='sum', filter=filters['channels'])[0]
     wbmtoi_occ = ss.query('wbmtoi_occupancy', agg_space='sum', filter=filters['chas'])[0]
     blemon_occ = ss.query('blemon_occupancy', agg_space='sum', filter=filters['chas'])[0]
-    pfillwpq34 = ss.query('pfillwpq34', agg_space='avg', filter=['SKT3CHAN0'])[0]
+    pfillwpq34 = ss.query('pfillwpq34', agg_space='avg', filter=['SKT0CHAN0'])[0]
 
     res = 0.0
 

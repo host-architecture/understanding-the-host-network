@@ -3,12 +3,15 @@
 isoconfig="aug23-c2m-read"
 colconfig="aug23-quad1"
 colconfig_bconf="aug23-bconf-quad1"
+colconfig2="aug23-quad2"
+colconfig2_bconf="aug23-bconf-quad2"
+
 
 #Fig 7a
-for i in 1 2 3 4 5 6; do paste <(echo $i) <(python3 ../collect_stats.py $colconfig-cores$i core:l1_miss_latency:avg,model:readlatcpu:latency --filter_num_cores $i --filter_core_list 11,15,19,23,27,31 ); done > ~/uhmc-nsdi24/results/oldserver/quad1/model-latency.tsv
+for i in 1 2 3 4 5 6; do paste <(echo $i) <(python3 ../collect_stats.py $colconfig-cores$i core:l1_miss_latency:avg --filter_num_cores $i --filter_core_list 11,15,19,23,27,31 ) <(python3 ../collect_stats.py $colconfig2-cores$i core:l1_miss_latency:avg --filter_num_cores $i --filter_core_list 11,15,19,23,27,31 ); done > ~/uhmc-nsdi24/results/oldserver/onesided/c2m-latency.tsv
 
 # Fig 7b
-for i in 1 2 3 4 5 6; do paste <(echo $i) <(python3 ../collect_stats.py $isoconfig-cores$i imc:rpq_occupancy:avg --filter_num_cores $i) <(python3 ../collect_stats.py $colconfig-cores$i imc:rpq_occupancy:avg --filter_num_cores $i --filter_core_list 11,15,19,23,27,31); done > ~/uhmc-nsdi24/results/oldserver/quad1/rpq-occupancy.tsv
+for i in 1 2 3 4 5 6; do paste <(echo $i) <(python3 ../collect_stats.py $isoconfig-cores$i imc:rpq_occupancy:avg --filter_num_cores $i) <(python3 ../collect_stats.py $colconfig-cores$i imc:rpq_occupancy:avg --filter_num_cores $i --filter_core_list 11,15,19,23,27,31); <(python3 ../collect_stats.py $colconfig2-cores$i imc:rpq_occupancy:avg --filter_num_cores $i --filter_core_list 11,15,19,23,27,31); done > ~/uhmc-nsdi24/results/oldserver/onesided/rpq-occupancy.tsv
 
 #Fig 7c
 for i in 1 2 3 4 5 6; do paste <(echo $i) <(python3 ../collect_stats.py $isoconfig-cores$i imc:acts_read:sum,imc:acts_byp:sum,imc:memreadbw:sum --filter_num_cores $i | awk '{print ($1+$2)/($3*1e6/64)}') <(python3 ../collect_stats.py $colconfig-cores$i imc:acts_read:sum,imc:acts_byp:sum,imc:memreadbw:sum --filter_num_cores $i --filter_core_list 11,15,19,23,27,31 | awk '{print ($1+$2)/($3*1e6/64)}') ; done  > ~/uhmc-nsdi24/results/oldserver/quad1/rowmiss.tsv

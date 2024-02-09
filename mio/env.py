@@ -72,8 +72,8 @@ class Environment:
 
 
 
-        if os.system('modprobe msr') != 0:
-            raise Exception('Failed to load msr kernel module')
+        #if os.system('modprobe msr') != 0:
+            #raise Exception('Failed to load msr kernel module')
 
 
     def get_mlc_path(self):

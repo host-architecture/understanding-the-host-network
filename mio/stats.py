@@ -1,7 +1,7 @@
 import os, sys, re, subprocess, glob
 
 MAX_SSDS = 8
-FIO_STATS_PATH = '/home/midhul/membw-eval'
+FIO_STATS_PATH = '/Users/midhul/uhmc-stats/membw-eval'
 
 CHA_FREQ = 2.4*1e9
 IMC_FREQ_PRAC = 1463000000.0
@@ -31,7 +31,7 @@ class StatStore:
             'estimated_latency': (lambda x: 71.3 + x, ['estimated_qd']),
             'read_activations': (lambda x, y: x + y, ['acts_read', 'acts_byp']),
             'cha_miss_latency': (lambda x, y, z: 1e9*(x/y)/z, ['tor_drd_miss_occ_agg', 'unc_clk', 'tor_drd_miss_inserts']),
-            'irp_write_latency': (lambda x, y, z: 1e9*(x/(z+0.0000000005))/(y+0.0000000000005), ['irp_write_occupancy', 'write_inserts_pcitom', 'irp_cycles']),
+            'irp_write_latency': (lambda x, y, z: 1e9*(x/(z+0.0000000005))/(y+0.0000000000005), ['irp_write_occupancy', 'write_inserts', 'irp_cycles']),
             'irp_occupancy': (lambda x, y: x/(y+0.0000000000005), ['irp_write_occupancy', 'irp_cycles']),
             'io_xput': (lambda x: x/8.0, ['fio_xput']),
             'lines_read': (lambda x: (x - 228.5)*1e6/64, ['memreadbw']),
@@ -222,7 +222,7 @@ class StatStore:
         self.d['fio_xput'] = {}
         for i in range(MAX_SSDS):
             if os.path.exists(os.path.join(FIO_STATS_PATH, '%s.fio%d.txt'%(config, i))):
-                self.d['fio_xput']['SSD%d'%(i)] = [float(subprocess.check_output(['./collect_fio.sh', config, str(io_size), str(i)]))]
+                self.d['fio_xput']['SSD%d'%(i)] = [float(subprocess.check_output([os.path.join(os.path.dirname(os.path.abspath(__file__)), '../collect_fio.sh'), config, str(io_size), str(i)]))]
 
     def compute_metric(self, metric):
         if not metric in self.derived_metrics:
