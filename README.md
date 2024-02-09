@@ -1,3 +1,9 @@
+## Note to self
+- `genie10` branch: latest updates
+- `genie14` branch: icelake modifications
+- `genie06` branch: for networking case studies
+- `artifact` branch: docs and scripts for reproducing experiments and compiling results
+
 ## Overview
 `mio` is a unified framework for experimenting with and understanding main memory contention between different applications/workloads on real server hardware (The name is inspired by `fio` a popular storage benchmarking tool, although `mio` is not really a benchmarking tool in itself). `mio` provides the following functionality:
 
