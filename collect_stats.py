@@ -33,7 +33,7 @@ parser.add_argument('--filter_num_cores', help='Number of cores from filter_core
 parser.add_argument('--filter_channels', help='List of memory channels to filter on', default=','.join(env.get_mem_channels()))
 parser.add_argument('--agg_time', help='Aggregation in time dimension', default='avg')
 parser.add_argument('--io_size', help='IO size for FIO', type=int, default=8*1024*1024)
-parser.add_argument('--filter_chas', help='List of CHAs to filter metrics on', default='SKT3C0,SKT3C1,SKT3C2,SKT3C3,SKT3C4,SKT3C5,SKT3C6,SKT3C7,SKT3C8,SKT3C9,SKT3C10,SKT3C11,SKT3C12,SKT3C13,SKT3C14,SKT3C15,SKT3C16,SKT3C17')
+parser.add_argument('--filter_chas', help='List of CHAs to filter metrics on', default='SKT0C0,SKT0C1,SKT0C2,SKT0C3,SKT0C4,SKT0C5,SKT0C6,SKT0C7,SKT0C8,SKT0C9,SKT0C10,SKT0C11,SKT0C12,SKT0C13,SKT0C14,SKT0C15,SKT0C16,SKT0C17')
 parser.add_argument('--filter_irps', help='List of IRPs to filter metrics on', default='SKT3IRP1,SKT3IRP2')
 default_ssds = ['SSD%d'%(i) for i in range(len(env.get_ssds()))]
 parser.add_argument('--filter_ssds', help='List of SSDs to filter metrics on', default='SSD0,SSD1,SSD2,SSD3,SSD4,SSD5')

@@ -24,7 +24,7 @@ class MLCRunner(Antagonist):
         out_f = open(self.output_path, 'w')
         # $MLC_PATH/mlc --loaded_latency -T -d0 -e -k$cores_str -j0 -b1g -t$duration $workload $avx512flag
         cores_str = ','.join([str(x) for x in self.cores])
-        args = [self.mlc_path, '--loaded_latency', '-T', '-d0', '-e', '-k' + cores_str, '-j' + str(self.mem_numa), '-b500m', '-t' + str(duration)]
+        args = [self.mlc_path, '--loaded_latency', '-T', '-d0', '-e', '-k' + cores_str, '-j' + str(self.mem_numa), '-b1g', '-t' + str(duration)]
         
         if self.write_frac == 0:
             args.append('-R')
@@ -32,6 +32,8 @@ class MLCRunner(Antagonist):
             args.append('-W5')
         elif self.write_frac == 100:
             args.append('-W6')
+        elif self.write_frac == 66:
+            args.append('-W2')
 
         if self.instsize == 32:
             args.append('-Y')
@@ -65,7 +67,7 @@ class MLCRunner(Antagonist):
         self.hugepages = val
     
     def set_writefrac(self, val):
-        if not val in [0, 50, 100]:
+        if not val in [0, 50, 66, 100]:
             raise Exception('Write fraction not supported')
 
         self.write_frac = val

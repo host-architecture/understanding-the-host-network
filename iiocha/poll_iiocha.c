@@ -21,9 +21,9 @@
 #define LOG_SIZE 1000000
 #define DURATION_SECS 10
 
-#define CORE 31
+#define CORE 4
 #define NUM_LPROCS 64
-#define SOCKET 3
+#define SOCKET 0
 #define CHANNEL 0
 # define NUM_IMC_CHANNELS 6			// includes channels on all IMCs in a socket
 # define NUM_IMC_COUNTERS 4			// 0-3 are the 4 programmable counters, 4 is the fixed-function DCLK counter
@@ -38,7 +38,7 @@
 #define WPQ_OCCUPANCY 0x00400081
 #define IRP_MSR_PMON_CTL_BASE 0x0A5BL
 #define IRP_MSR_PMON_CTR_BASE 0x0A59L
-#define STACK 1
+#define STACK 2
 #define IRP_OCC_VAL 0x0040040F
 
 #define NUM_CHA_BOXES 1
@@ -162,8 +162,8 @@ uint32_t PCI_cfg_index(unsigned int Bus, unsigned int Device, unsigned int Funct
 static void update_log(int c){
 	LOG[log_index % LOG_SIZE].l_tsc = cur_rdtsc;
 	LOG[log_index % LOG_SIZE].td_ns = ((cur_rdtsc - prev_rdtsc) * 10) / TSC_ratio;
-	// LOG[log_index % LOG_SIZE].bank0_count = cur_irp_occ_agg - prev_irp_occ_agg;
-    LOG[log_index % LOG_SIZE].bank0_count = cur_imc_counts[CHANNEL][0] - prev_imc_counts[CHANNEL][0];
+	LOG[log_index % LOG_SIZE].bank0_count = cur_irp_occ_agg - prev_irp_occ_agg;
+    //LOG[log_index % LOG_SIZE].bank0_count = cur_imc_counts[CHANNEL][0] - prev_imc_counts[CHANNEL][0];
     // LOG[log_index % LOG_SIZE].bank1_count = ((cur_irp_ts - prev_irp_ts) * 10) / TSC_ratio;
     // LOG[log_index % LOG_SIZE].bank2_count = cur_cha_count_agg[0] - prev_cha_count_agg[0];
     // LOG[log_index % LOG_SIZE].bank3_count = cur_cha_count_agg[1] - prev_cha_count_agg[1];
@@ -317,8 +317,8 @@ static void sample_time_counter(){
 }
 
 static void sample_counters(int c){
-    sample_imc_counters();
-    // sample_irp_counters();
+    //sample_imc_counters();
+    sample_irp_counters();
     // sample_cha_counters();
 
 	//sample time at the last

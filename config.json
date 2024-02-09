@@ -9,8 +9,8 @@
     "MMAPBENCH_PATH": "/home/midhul/mio/mmapbench",
     "GAPBS_PATH": "/home/midhul/gapbs",
     "NUMA_CORES": ["0,4,8,12,16,20,24,28", "1,5,9,13,17,21,25,29", "2,6,10,14,18,22,26,30", "3,7,11,15,19,23,27,31"],
-    "NUMA_ORDER": "3,0,1,2",
+    "NUMA_ORDER": "0,1,2,3",
     "SSDS": ["/dev/nvme0n1", "/dev/nvme1n1", "/dev/nvme2n1", "/dev/nvme3n1", "/dev/nvme4n1", "/dev/nvme5n1"],
     "SSDScomment": ["/dev/nvme2n1", "/dev/nvme3n1"],
-    "MEM_CHANNELS": ["SKT3CHAN0", "SKT3CHAN3"] 
+    "MEM_CHANNELS": ["SKT0CHAN0", "SKT0CHAN3"] 
 }
