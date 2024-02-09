@@ -128,7 +128,9 @@ def run_benchmark(args, env):
         elif args.ant == 'redis':
             ant = RedisRunner(env.get_redis_path(), env.get_memtier_path())
         elif args.ant == 'gapbs':
-            ant = GAPBSRunner(env.get_gapbs_path())
+            ant = GAPBSRunner(env.get_gapbs_path(), 'pr')
+        elif args.ant == 'gapbs-bc':
+            ant = GAPBSRunner(env.get_gapbs_path(), 'bc')
         else:
             raise Exception('Unknown antagonist')
 

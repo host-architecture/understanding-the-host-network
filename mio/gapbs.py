@@ -3,8 +3,8 @@ from .antagonist import *
 import subprocess, os, time, signal
 
 class GAPBSRunner(Antagonist):
-    def __init__(self, path):
-        self.gapbs_path = os.path.join(path, 'pr')
+    def __init__(self, path, workload):
+        self.gapbs_path = os.path.join(path, workload)
 
     def init(self, output_path, cores, mem_numa, opts):
         self.output_path = output_path

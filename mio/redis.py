@@ -58,12 +58,16 @@ class RedisRunner(Antagonist):
         
 
     def run(self, duration):
+        workload = 'get'
+        print(self.write_frac)
+        if self.write_frac == 100:
+            workload = 'set'
         # Duration is ignored (not supported for now)
         for i, j in zip(self.client_cores, self.cores):
             out_f = open(self.output_path + ('-core%d'%(j)), 'w')
         # numactl --membind 0 --physcpubind 0 ./redis-benchmark -c 2 -n 100000000 -d 1024 -r 1000000 -t get -P 128
             args = []
-            args += ['numactl', '--membind', str(self.client_numa), '--physcpubind', str(i), self.redis_client_path, '-s', '/tmp/redis.sock%d'%(j), '-c', str(self.num_clients_per_core), '-n', str(self.num_accesses_per_core), '-d', str(self.value_size), '-r', str(self.num_keys_per_core), '-t', 'get', '-P', str(self.pipeline)]
+            args += ['numactl', '--membind', str(self.client_numa), '--physcpubind', str(i), self.redis_client_path, '-s', '/tmp/redis.sock%d'%(j), '-c', str(self.num_clients_per_core), '-n', str(self.num_accesses_per_core), '-d', str(self.value_size), '-r', str(self.num_keys_per_core), '-t', workload, '-P', str(self.pipeline)]
             self.procs.append(subprocess.Popen(args, stdout=out_f, stderr=subprocess.STDOUT))
 
     def wait(self):
@@ -86,4 +90,7 @@ class RedisRunner(Antagonist):
         raise Exception('Not supported')
     
     def set_writefrac(self, val):
-        raise Exception('Not supported')
+        if val in [0, 100]:
+            self.write_frac = val
+        else:
+            raise Exception('Not supported')
