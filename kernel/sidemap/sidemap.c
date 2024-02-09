@@ -15,7 +15,7 @@
 
 #define LOCAL_NUMA 1
 #define REMOTE_NUMA 0
-#define FP_SIZE 250000 // 1GB
+#define FP_SIZE 262144 // 1GiB
 
 struct dentry  *file1;
 struct dentry  *file2;
@@ -79,7 +79,7 @@ static int init_frame_pool(struct frame_pool *fp, int num_pages, int nid) {
     }
     // Allocate physical frames
     for(i = 0; i < num_pages; i++) {
-        fp->pages[i] = alloc_pages_node(LOCAL_NUMA, GFP_HIGHUSER, 0);
+        fp->pages[i] = alloc_pages_node(nid, GFP_HIGHUSER, 0);
         if(fp->pages[i] == NULL) {
             pr_info("alloc_pages_node failed \n");
             goto err;
@@ -120,7 +120,7 @@ static vm_fault_t vm_fault(struct vm_fault *vmf)
         fp->mapped_addrs[fp->page_idx] = 0;
     }
     
-    ret = vmf_insert_pfn(vmf->vma, vmf->address, page_to_pfn(fp->pages[fp->page_idx]));
+    ret = vmf_insert_pfn_notrack(vmf->vma, vmf->address, page_to_pfn(fp->pages[fp->page_idx]));
     fp->mapped_vmas[fp->page_idx] = vmf->vma;
     fp->mapped_addrs[fp->page_idx] = vmf->address;
 
@@ -175,7 +175,7 @@ int __my_mmap(struct file *filp, struct vm_area_struct *vma, int fp_size, int ni
     }
     vma->vm_private_data = fp;
     vma->vm_ops = &vm_ops;
-    vma->vm_flags |= VM_PFNMAP | VM_DONTEXPAND | VM_DONTDUMP;
+    vm_flags_set(vma, VM_PFNMAP | VM_DONTEXPAND | VM_DONTDUMP);
     vma->vm_page_prot = vm_get_page_prot(vma->vm_flags);
     pr_info("sidemap mmap successful");
     return 0;

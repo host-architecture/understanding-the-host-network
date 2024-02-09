@@ -104,6 +104,57 @@ double WORKLOAD_WriteAll64(void *p, size_t len, uint64_t *read_checksum) {
 	return len;
 }
 
+double WORKLOAD_ReadAll16(void *p, size_t len, uint64_t *read_checksum) {
+    asm volatile(
+        "mov    %[memarea], %%rax \n"
+        "2: \n"
+        "movdqa 0*16(%%rax), %%xmm0 \n"
+        "movdqa 1*16(%%rax), %%xmm1 \n"
+        "movdqa 2*16(%%rax), %%xmm2 \n"
+        "movdqa 3*16(%%rax), %%xmm3 \n"
+        "movdqa 4*16(%%rax), %%xmm4 \n"
+        "movdqa 5*16(%%rax), %%xmm5 \n"
+        "movdqa 6*16(%%rax), %%xmm6 \n"
+        "movdqa 7*16(%%rax), %%xmm7 \n"
+        "add    $8*16, %%rax \n"
+        "cmp    %[end], %%rax \n"
+        "jb     2b \n"
+		:
+        : [memarea] "r" ((char *)p), [end] "r" ((char *)p + len)
+        : "rax", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "cc", "memory");
+	return len;
+}
+
+double WORKLOAD_ReadWriteAll16(void *p, size_t len, uint64_t *read_checksum) {
+    asm volatile(
+        "mov    %[memarea], %%rax \n"
+        "2: \n"
+        "movdqa 0*16(%%rax), %%xmm0 \n"
+		"movdqa %%xmm0, 0*16(%%rax) \n"
+        "movdqa 1*16(%%rax), %%xmm1 \n"
+		"movdqa %%xmm1, 1*16(%%rax) \n"
+        "movdqa 2*16(%%rax), %%xmm2 \n"
+		"movdqa %%xmm2, 2*16(%%rax) \n"
+        "movdqa 3*16(%%rax), %%xmm3 \n"
+		"movdqa %%xmm3, 3*16(%%rax) \n"
+        "movdqa 4*16(%%rax), %%xmm4 \n"
+		"movdqa %%xmm4, 4*16(%%rax) \n"
+        "movdqa 5*16(%%rax), %%xmm5 \n"
+		"movdqa %%xmm5, 5*16(%%rax) \n"
+        "movdqa 6*16(%%rax), %%xmm6 \n"
+		"movdqa %%xmm6, 6*16(%%rax) \n"
+        "movdqa 7*16(%%rax), %%xmm7 \n"
+		"movdqa %%xmm7, 7*16(%%rax) \n"
+        "add    $8*16, %%rax \n"
+        "cmp    %[end], %%rax \n"
+        "jb     2b \n"
+		:
+        : [memarea] "r" ((char *)p), [end] "r" ((char *)p+len)
+        : "rax", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "cc", "memory");
+	return 2*len;
+}
+
+
 
 
 
@@ -140,7 +191,13 @@ int main(int argc, char **argv) {
 	} else if(strcmp(workload, "WriteAll64") == 0) {
 		execute = &WORKLOAD_WriteAll64;
         workload_writes = 1;
-	} else {
+	} else if(strcmp(workload, "ReadAll16") == 0) {
+		execute = &WORKLOAD_ReadAll16;
+	} else if(strcmp(workload, "ReadWriteAll16") == 0) {
+		execute = &WORKLOAD_ReadWriteAll16;
+        workload_writes = 1;
+	}
+    else {
 		printf("Unknown workload\n");
 		exit(-1);
 	}

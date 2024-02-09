@@ -64,8 +64,8 @@ events_group_101 = {'rxl_flits_nondata': 'upi/config=0x0000000000409703', 'rxl_f
 # SSD = ['/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1', '/dev/nvme6n1', '/dev/nvme7n1']
 # SSD = ['/dev/nvme0n1', '/dev/nvme1n1', '/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1']
 # sdb, sdc, sde, sdh, sdi, sdj, sdk
-#SSD = ['/dev/sdc', '/dev/sde', '/dev/sdi', '/dev/sdj', '/dev/sdb', '/dev/sdh', '/dev/sdk']
-SSD_MNTS = ['/mnt/sdc1', '/mnt/sde1', '/mnt/sdi1', '/mnt/sdj1', '/mnt/sdb1', '/mnt/sdh1', '/mnt/sdk1']
+SSD = ['/dev/sdb', '/dev/sdc', '/dev/sdd', '/dev/sde', '/dev/sdf', '/dev/sdg', '/dev/sdh', '/dev/sdi']
+#SSD_MNTS = ['/mnt/sdc1', '/mnt/sde1', '/mnt/sdi1', '/mnt/sdj1', '/mnt/sdb1', '/mnt/sdh1', '/mnt/sdk1']
 
 def expand_ranges(x):
     result = []
@@ -139,7 +139,9 @@ def run_benchmark(args, env):
         elif args.ant == 'redis':
             ant = RedisRunner(env.get_redis_path(), env.get_memtier_path())
         elif args.ant == 'gapbs':
-            ant = GAPBSRunner(env.get_gapbs_path())
+            ant = GAPBSRunner(env.get_gapbs_path(), 'pr')
+        elif args.ant == 'gapbs-bc':
+            ant = GAPBSRunner(env.get_gapbs_path(), 'bc')
         else:
             raise Exception('Unknown antagonist')
 
@@ -228,7 +230,9 @@ def run_benchmark(args, env):
         mmapbench_opts = {}
         if args.mmapbench_cg_per_process:
             mmapbench_opts['cg_per_process'] = True
-        mmapbench.init(os.path.join(env.get_stats_path(), '%s.mmapbench.txt'%(prefix)), mmapbench_cores, args.mmapbench_mem_numa, args.mmapbench_threads_per_core, mmapbench_ssds, args.mmapbench_areasize, args.mmapbench_pgcache_frac, mmapbench_opts)
+        if mem_numa_list:
+            mmapbench_opts['mem_numa_list'] = mem_numa_list
+        mmapbench.init(os.path.join(env.get_stats_path(), '%s-cores%d.mmapbench.txt'%(prefix, args.mmapbench_num_cores)), mmapbench_cores, args.mmapbench_mem_numa, args.mmapbench_threads_per_core, mmapbench_ssds, args.mmapbench_areasize, args.mmapbench_pgcache_frac, mmapbench_opts)
         if args.mmapbench_inst_size:
             mmapbench.set_instsize(args.mmapbench_inst_size)
         if args.mmapbench_pattern:

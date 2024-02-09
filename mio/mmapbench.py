@@ -7,7 +7,10 @@ class MmapBenchRunner:
     def init(self, output_path, cores, mem_numa, threads_per_core, ssds, area_size, pgcache_frac, opts):
         self.output_path = output_path
         self.cores = cores
-        self.mem_numa = mem_numa
+        if 'mem_numa_list' in opts:
+            self.mem_numa = opts['mem_numa_list']
+        else:
+            self.mem_numa = [mem_numa for _ in range(len(cores))]
         self.opts = opts
         self.threads_per_core = threads_per_core
         self.ssds = ssds
@@ -18,7 +21,7 @@ class MmapBenchRunner:
             self.cg_per_process = True
 
         # Default parameters
-        self.instsize = 64
+        self.instsize = 16
         self.pattern = 'sequential'
         self.hugepages = False
         self.write_frac = 0
@@ -27,32 +30,32 @@ class MmapBenchRunner:
 
         # Create cgroup for page cache memory limit
         # Shouldn't fail if already present
-        if not self.cg_per_process:
-            pgcache_limit = int(self.pgcache_frac * self.area_size * len(self.cores) * self.threads_per_core) 
-            ret = os.system('cgcreate -g memory:/mmapbench')
-            if ret != 0:
-                raise Exception('cgroup creation failed')
-            ret = os.system('echo %d > /sys/fs/cgroup/memory/mmapbench/memory.limit_in_bytes'%(pgcache_limit))
-            if ret != 0:
-                raise Exception('Setting cgroup memory limit failed')
-        else:
-            # Create per-process cgroups
-            pgcache_limit = int(self.pgcache_frac * self.area_size)
-            num_procs = self.threads_per_core * len(self.cores)
-            for i in range(num_procs):
-                ret = os.system('cgcreate -g memory:/mmapbench%d'%(i))
-                if ret != 0:
-                    raise Exception('cgroup creation failed')
-                # TODO: set pg cache limit correctly 
-                ret = os.system('echo %d > /sys/fs/cgroup/memory/mmapbench%d/memory.limit_in_bytes'%(pgcache_limit, i))
-                if ret != 0:
-                    raise Exception('Setting cgroup memory limit failed')
+        # if not self.cg_per_process:
+        #     pgcache_limit = int(self.pgcache_frac * self.area_size * len(self.cores) * self.threads_per_core) 
+        #     ret = os.system('cgcreate -g memory:/mmapbench')
+        #     if ret != 0:
+        #         raise Exception('cgroup creation failed')
+        #     ret = os.system('echo %d > /sys/fs/cgroup/memory/mmapbench/memory.limit_in_bytes'%(pgcache_limit))
+        #     if ret != 0:
+        #         raise Exception('Setting cgroup memory limit failed')
+        # else:
+        #     # Create per-process cgroups
+        #     pgcache_limit = int(self.pgcache_frac * self.area_size)
+        #     num_procs = self.threads_per_core * len(self.cores)
+        #     for i in range(num_procs):
+        #         ret = os.system('cgcreate -g memory:/mmapbench%d'%(i))
+        #         if ret != 0:
+        #             raise Exception('cgroup creation failed')
+        #         # TODO: set pg cache limit correctly 
+        #         ret = os.system('echo %d > /sys/fs/cgroup/memory/mmapbench%d/memory.limit_in_bytes'%(pgcache_limit, i))
+        #         if ret != 0:
+        #             raise Exception('Setting cgroup memory limit failed')
 
 
         # Clear page cache
-        ret = os.system('echo 1 > /proc/sys/vm/drop_caches')
-        if ret != 0:
-            raise Exception('Failed to clear page cache')
+        # ret = os.system('echo 1 > /proc/sys/vm/drop_caches')
+        # if ret != 0:
+        #     raise Exception('Failed to clear page cache')
         
 
     def run(self, duration):
@@ -65,12 +68,15 @@ class MmapBenchRunner:
                 # sudo cgexec -g memory:foo taskset -c 1 ./mmapbench WriteOneByte 60 /dev/sdc 0 $((10*1024*1024*1024))
                 args = []
                 #args += ['cgexec', '-g', 'memory:mmapbench', 'numactl', '--membind', str(self.mem_numa), '--physcpubind', str(i), self.mmapbench_path]
-                cg = 'memory:mmapbench%d'%(core_idx*self.threads_per_core + j) if self.cg_per_process else 'memory:mmapbench'
-                args += ['cgexec', '-g', cg, 'taskset', '-c', str(i), self.mmapbench_path]
+                # cg = 'memory:mmapbench%d'%(core_idx*self.threads_per_core + j) if self.cg_per_process else 'memory:mmapbench'
+                # args += ['cgexec', '-g', cg, 'taskset', '-c', str(i), self.mmapbench_path]
+                args += ['taskset', '-c', str(i), self.mmapbench_path]
             
                 workload_str = ''
                 if self.write_frac == 0:
                     workload_str += 'Read'
+                elif self.write_frac == 50:
+                    workload_str += 'ReadWrite'
                 elif self.write_frac == 100:
                     workload_str += 'Write'
 
@@ -78,6 +84,8 @@ class MmapBenchRunner:
                     workload_str += 'All'
                     if self.instsize == 64:
                         workload_str += '64'
+                    elif self.instsize == 16:
+                        workload_str += '16'
                 elif self.pattern == 'sequential_onebyte':
                     workload_str += 'OneByte'
 
@@ -85,16 +93,21 @@ class MmapBenchRunner:
                 args.append(str(duration))
 
                 # Round robin across SSDs
-                fpath = os.path.join(self.ssds[ssd_idx], 'datafile%d'%(ssd_offsets[ssd_idx]))
-                if not os.path.exists(fpath):
-                    print(fpath)
-                    raise Exception('Datafile does not exist')
+                # fpath = os.path.join(self.ssds[ssd_idx], 'datafile%d'%(ssd_offsets[ssd_idx]))
+                # if not os.path.exists(fpath):
+                #     print(fpath)
+                #     raise Exception('Datafile does not exist')
+                # args.append(fpath)
+                # # Always map from offset 0. There appears to be a perf regression when mmaping from non-zero offset
+                # args.append(str(0))
+                # args.append(str(self.area_size))
+                # ssd_offsets[ssd_idx] += 1
+                # ssd_idx = (ssd_idx + 1)%len(self.ssds)
+
+                fpath = '/sys/kernel/debug/sidemap-local' if(self.mem_numa[core_idx] == 1) else '/sys/kernel/debug/sidemap-remote'
                 args.append(fpath)
-                # Always map from offset 0. There appears to be a perf regression when mmaping from non-zero offset
                 args.append(str(0))
                 args.append(str(self.area_size))
-                ssd_offsets[ssd_idx] += 1
-                ssd_idx = (ssd_idx + 1)%len(self.ssds)
 
 
                 my_env = os.environ.copy()
@@ -114,7 +127,7 @@ class MmapBenchRunner:
             p.kill()
 
     def set_instsize(self, size):
-        if size not in [64]:
+        if size not in [16, 64]:
             raise Exception('Instruction size not supported')
         self.instsize = size
 
@@ -129,7 +142,7 @@ class MmapBenchRunner:
         self.hugepages = val
     
     def set_writefrac(self, val):
-        if not val in [0, 100]:
+        if not val in [0, 50, 100]:
             raise Exception('Write fraction not supported')
 
         self.write_frac = val
