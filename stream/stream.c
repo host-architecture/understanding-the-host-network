@@ -952,6 +952,11 @@ main(int argc, char **argv)
 
     printf(HLINE);
 
+    // mlock to "pin" memory
+    if(mlock(a, STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE)) != 0) {
+      	printf("mlock failed\n");
+    }
+
     if  ( (quantum = checktick()) >= 1) 
 	printf("Your clock granularity/precision appears to be "
 	    "%d microseconds.\n", quantum);
