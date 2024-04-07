@@ -7,6 +7,7 @@ from .fio import *
 from .stream import *
 from .redis import *
 from .gapbs import *
+from .mbm import *
 
 import os, time
 import argparse
@@ -60,6 +61,8 @@ events_group_22 = {'rpq_occ_gte40': 'imc/config=0x28400080', 'rpq_occ_gte42': 'i
 # events_group_2 = {'load_l2_hits': 'core/config=0x00000000004302d1', 'load_l2_misses': 'core/config=0x00000000004310d1', 'load_l3_hits': 'core/config=0x00000000004304d1', 'load_l3_misses': 'core/config=0x00000000004320d1'}
 # events_group_3 = {'rpq_occ_agg': 'imc/config=0x0000000000400080', 'rpq_occ_agg1': 'imc/config=0x0000000000400081', 'wpq_occ_agg': 'imc/config=0x000000000040082', 'wpq_occ_agg1': 'imc/config=0x000000000040083'}
 events_group_101 = {'rxl_flits_nondata': 'upi/config=0x0000000000409703', 'rxl_flits_data': 'upi/config=0x0000000000400f03', 'txl_flits_nondata': 'upi/config=0x0000000000409702', 'txl_flits_data': 'upi/config=0x0000000000400f02'}
+events_group_401 = {'drd_occ_agg_local': 'cha/config=0x00c8168600400136', 'drd_inserts_local': 'cha/config=0x00c8168600400135'}
+events_group_402 = {'drd_occ_agg_remote': 'cha/config=0x00c8170600400136', 'drd_inserts_remote': 'cha/config=0x00c8170600400135'}
 
 # SSD = ['/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1', '/dev/nvme6n1', '/dev/nvme7n1']
 # SSD = ['/dev/nvme0n1', '/dev/nvme1n1', '/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1']
@@ -156,6 +159,10 @@ def run_benchmark(args, env):
             ant_opts['warmup_duration'] = ANT_WARMUP_DURATION
             ant_opts['cooldown_duration'] = ANT_COOLDOWN_DURATION
 
+        if args.ant_vary_load:
+            with open(args.ant_vary_load, 'r') as varyf:
+                ant_opts['vary_load'] = [int(line.strip()) for line in varyf if line.strip()]
+
         ant.init(os.path.join(env.get_stats_path(), '%s-cores%d.%s.txt'%(prefix, num_cores, args.ant)), cores, mem_numa, ant_opts)
         if args.ant_inst_size:
             ant.set_instsize(args.ant_inst_size)
@@ -165,6 +172,7 @@ def run_benchmark(args, env):
             ant.set_writefrac(args.ant_writefrac)
         if args.ant_hugepages:
             ant.set_hugepages(True)
+
 
         ant.run(ant_duration)
 
@@ -300,7 +308,19 @@ def run_benchmark(args, env):
         time.sleep(WARMUP_DURATION)
         sar = SarRunner()
         sar.run(os.path.join(env.get_stats_path(), '%s.sar.txt'%(prefix)), RECORD_DURATION)
-
+    elif args.stats_colloid:
+        time.sleep(args.stats_colloid_wait)
+        print('stats record start')
+        pcm_mem = PcmMemoryRunner(env.get_pcm_path())
+        pcm_mem.run(os.path.join(env.get_stats_path(), '%s.pcm-memory.txt'%(prefix)), RECORD_DURATION)
+        pcm_raw = PcmRawRunner(env.get_pcm_path())
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s.pcm-upi.txt'%(prefix)), events_group_101, RECORD_DURATION)
+        if args.stats_colloid_cha:
+            pcm_raw.run(os.path.join(env.get_stats_path(), '%s.pcm-cha1.txt'%(prefix)), events_group_401, RECORD_DURATION)
+            pcm_raw.run(os.path.join(env.get_stats_path(), '%s.pcm-cha2.txt'%(prefix)), events_group_402, RECORD_DURATION)
+        mbm = MBMRunner("") # assuming pqos in PATH
+        mbm.run(os.path.join(env.get_stats_path(), '%s.mbm.txt'%(prefix)), env.get_cores_in_numa(env.get_numa_order()[0]), RECORD_DURATION+2)
+        print('stats record end')
 
 
 
@@ -405,6 +425,10 @@ def main(argv=[]):
     parser.add_argument('--mmapbench_inst_size', help='Instruction size for mmapbench', type=int)
     parser.add_argument('--mmapbench_pattern', help='mmapbench access pattern')
     parser.add_argument('--mmapbench_cg_per_process', help='One cgroup per process', action='store_true')
+    parser.add_argument('--stats_colloid', help='Record stats for colloid', action='store_true')
+    parser.add_argument('--stats_colloid_wait', help='Duration to wait before recording colloid stats (in secs)', type=int, default=30)
+    parser.add_argument('--stats_colloid_cha', help='Record cha stats for colloid', action='store_true')
+    parser.add_argument('--ant_vary_load', help='file containing one integer per-line specifying how many ant cores should be active per-second')
 
 
     args = parser.parse_args(argv[1:])

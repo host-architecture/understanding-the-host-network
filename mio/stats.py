@@ -310,6 +310,40 @@ class StatStore:
                     self.d['gapbs_time'] = {}
                     self.d['gapbs_time']['ALL'] = []
                 self.d['gapbs_time']['ALL'].append(float(cols[2]))
+
+    def load_mbm(self, filepath, warmup_iters=2):
+            # parse and load mbm output file
+            # print('load mbm enter')
+            with open(filepath, 'r') as f:
+                for line in f:
+                    if not re.search('\d\d\d\d-\d\d-\d\d ', line):
+                        continue
+
+                    # print('load_mbm: parsing line')
+                    cols = line.split(',')
+                    core_num = int(cols[1].replace('"', ''))
+                    space_unit = 'CORE%d'%(core_num)
+
+                    if 'mbl' not in self.d:
+                        self.d['mbl'] = {}
+                    if space_unit not in self.d['mbl']:
+                        self.d['mbl'][space_unit] = []
+                    self.d['mbl'][space_unit].append(float(cols[4]))
+
+                    if 'mbr' not in self.d:
+                        self.d['mbr'] = {}
+                    if space_unit not in self.d['mbr']:
+                        self.d['mbr'][space_unit] = []
+                    self.d['mbr'][space_unit].append(float(cols[5]))
+                
+            # MBM appears to have startup latency. discard first 2 samples
+            if 'mbl' in self.d:
+                for x in self.d['mbl']:
+                    self.d['mbl'][x] = self.d['mbl'][x][2:]
+            
+            if 'mbr' in self.d:
+                for x in self.d['mbr']:
+                    self.d['mbr'][x] = self.d['mbr'][x][2:] 
             
 
     def query(self, metric, agg_space='avg', agg_time='avg', filter=None):
@@ -339,4 +373,5 @@ class StatStore:
             return [res[x] for x in res]
         else:
             raise Exception('unknown agg_space')
+
         

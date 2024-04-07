@@ -33,7 +33,7 @@ parser.add_argument('--filter_num_cores', help='Number of cores from filter_core
 parser.add_argument('--filter_channels', help='List of memory channels to filter on', default=','.join(env.get_mem_channels()))
 parser.add_argument('--agg_time', help='Aggregation in time dimension', default='avg')
 parser.add_argument('--io_size', help='IO size for FIO', type=int, default=8*1024*1024)
-parser.add_argument('--filter_chas', help='List of CHAs to filter metrics on', default='SKT3C0,SKT3C1,SKT3C2,SKT3C3,SKT3C4,SKT3C5,SKT3C6,SKT3C7,SKT3C8,SKT3C9,SKT3C10,SKT3C11,SKT3C12,SKT3C13,SKT3C14,SKT3C15,SKT3C16,SKT3C17')
+parser.add_argument('--filter_chas', help='List of CHAs to filter metrics on', default='SKT1C0,SKT1C1,SKT1C2,SKT1C3,SKT1C4,SKT1C5,SKT1C6,SKT1C7,SKT1C8,SKT1C9,SKT1C10,SKT1C11,SKT1C12,SKT1C13,SKT1C14,SKT1C15,SKT1C16,SKT1C17,SKT1C18,SKT1C19,SKT1C20,SKT1C21,SKT1C22,SKT1C23,SKT1C24,SKT1C25,SKT1C26,SKT1C27,SKT1C28,SKT1C29,SKT1C30,SKT1C31')
 parser.add_argument('--filter_irps', help='List of IRPs to filter metrics on', default='SKT3IRP1,SKT3IRP2')
 default_ssds = ['SSD%d'%(i) for i in range(len(env.get_ssds()))]
 parser.add_argument('--filter_ssds', help='List of SSDs to filter metrics on', default=','.join(default_ssds))
@@ -93,6 +93,10 @@ if os.path.isfile(filepath):
     ss.load_pcm_raw(filepath)
 
 filepath= os.path.join(STATS_PATH, args.config + '.pcm-cha.txt')
+if os.path.isfile(filepath):
+    ss.load_pcm_raw(filepath)
+
+filepath= os.path.join(STATS_PATH, args.config + '.pcm-cha1.txt')
 if os.path.isfile(filepath):
     ss.load_pcm_raw(filepath)
 
@@ -183,6 +187,10 @@ if os.path.isfile(filepath):
 filepath= os.path.join(STATS_PATH, args.config + '.gapbs-bc.txt')
 if os.path.isfile(filepath):
     ss.load_gapbs(filepath)
+
+filepath= os.path.join(STATS_PATH, args.config + '.mbm.txt')
+if os.path.isfile(filepath):
+    ss.load_mbm(filepath)
 
 filter_cores = args.filter_core_list.split(',')
 filter_cores = filter_cores[:args.filter_num_cores]

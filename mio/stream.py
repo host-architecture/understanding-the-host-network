@@ -1,6 +1,8 @@
 from .antagonist import *
 
 import subprocess, os
+import threading, time
+import signal
 
 class STREAMRunner(Antagonist):
     def __init__(self, path):
@@ -13,6 +15,14 @@ class STREAMRunner(Antagonist):
             self.mem_numa = opts['mem_numa_list']
         else:
             self.mem_numa = [mem_numa for _ in range(len(cores))]
+        
+        # Vary number of cores over time
+        # 'vary_load' is a list if integers specifying specifying the number of active cores every second
+        if 'vary_load' in opts:
+            self.vary_load = opts['vary_load']
+        else:
+            self.vary_load = []
+
         self.opts = opts
 
         # Default parameters
@@ -22,6 +32,7 @@ class STREAMRunner(Antagonist):
         self.write_frac = 0
 
         self.procs = []
+        self.vary_load_thread = None
 
     def run(self, duration):
         idx = 0
@@ -70,12 +81,43 @@ class STREAMRunner(Antagonist):
 
             self.procs.append(subprocess.Popen(args, stdout=out_f, stderr=subprocess.STDOUT, env=my_env))
             idx += 1
+        
+        if len(self.vary_load) > 0:
+            # sanity check
+            if(max(self.vary_load) > len(self.cores)):
+                raise Exception('vary_load contains value greater than max cores provisisoned')
+            self.vary_load_thread = threading.Thread(target=self.vary_load_worker)
+            self.vary_load_stop = threading.Event()
+            self.vary_load_thread.start()
+
+    def vary_load_worker(self):
+        # Warmup duration before varying load
+        time.sleep(5)
+        # Pause all cores
+        for p in self.procs:
+            p.send_signal(signal.SIGSTOP)
+
+        cur_active_cores = 0
+        for active_cores in self.vary_load:
+            time.sleep(1)
+            if(active_cores > cur_active_cores):
+                for i in range(cur_active_cores, active_cores):
+                    self.procs[i].send_signal(signal.SIGCONT)
+            elif(active_cores < cur_active_cores):
+                for i in range(active_cores, cur_active_cores):
+                    self.procs[i].send_signal(signal.SIGSTOP)
+            cur_active_cores = active_cores
 
     def wait(self):
+        if self.vary_load_thread:
+            self.vary_load_thread.join()
         for p in self.procs:
             p.wait()
 
     def cleanup(self):
+        if self.vary_load_thread:
+            self.vary_load_stop.set()
+            self.vary_load_thread.join()
         for p in self.procs:
             p.kill()
 
