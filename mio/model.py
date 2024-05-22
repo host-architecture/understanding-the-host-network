@@ -130,7 +130,8 @@ def compute_writelat(ss, d, filters, const, agent='cpu', sched='sq', xpr='def', 
     read_acts = ss.query('acts_read', agg_space='sum', filter=filters['channels'])[0] + ss.query('acts_byp', agg_space='sum', filter=filters['channels'])[0]
     write_acts = ss.query('acts_write', agg_space='sum', filter=filters['channels'])[0]
     write_no_credits = ss.query('cha_write_no_credits', agg_space='sum', filter=filters['chas'])[0]
-    lfb_sum = ss.query('fb_occupancy', agg_space='sum', filter=filters['cores'])[0]
+    #lfb_sum = ss.query('fb_occupancy', agg_space='sum', filter=filters['cores'])[0]
+    lbf_sum = 0.0
     iio_occ = ss.query('irp_write_occupancy', agg_space='sum', filter=filters['irps'])[0] / ss.query('irp_cycles', agg_space='avg', filter=filters['irps'])[0]
     rpq_occupancy_total = ss.query('rpq_occupancy', agg_space='sum', filter=filters['channels'])[0]
     wbmtoi_occ = ss.query('wbmtoi_occupancy', agg_space='sum', filter=filters['chas'])[0]
