@@ -72,6 +72,12 @@ class Environment:
         if 'IRPS' in config_dict:
             self.irps = config_dict['IRPS']
 
+        if 'CHA_FREQ' in config_dict:
+            self.cha_freq = config_dict['CHA_FREQ']
+
+        if 'IMC_FREQ' in config_dict:
+            self.imc_freq = config_dict['IMC_FREQ']
+
 
         if os.system('modprobe msr') != 0:
             raise Exception('Failed to load msr kernel module')
@@ -174,3 +180,14 @@ class Environment:
         if not self.irps:
             raise Exception('IRPS config not found')
         return self.irps
+    
+    def get_cha_freq(self):
+        if not self.cha_freq:
+            raise Exception('CHA_FREQ config not found')
+        return self.cha_freq
+    
+    def get_imc_freq(self):
+        if not self.imc_freq:
+            raise Exception('IMC_FREQ config not found')
+        return self.imc_freq
+    
