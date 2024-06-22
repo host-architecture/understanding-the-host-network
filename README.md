@@ -14,7 +14,7 @@ This repository is organized as follows:
 * [`mio`](mio) A tool to that makes it easy to simultaneously run multiple applications/workloads while performing low-overhead measurements of a plethora of metrics at various host network nodes (Memory Controller, Caching and Home Agent, Integrated I/O controller, etc.) 
 * [`microsec`](microsec) Infrastructure to perform host network measurements at microsecond-scale using a dedicated CPU core. 
 * [`stream`](stream) A modified version of the standard STREAM benchmark which supports different read/write ratios and memory access patterns.
-* [`sigcomm24`](sigcomm24) Documentation and scripts to reproduce the experiments from our [SIGCOMM'24 paper](https://www.cs.cornell.edu/~midhul/papers/uhnet.pdf).
+* [`sigcomm24`](sigcomm24) Documentation and scripts to reproduce the experiments from our SIGCOMM'24 paper.
 
 ## Current limitations
 Currently, our infrastructure primarily supports the Intel Cascade Lake architecture (with partial support for Intel Ice Lake). Extension to other Intel and AMD architectures is an important future direction. Please do reach out if you are interested in contributing to this. 
