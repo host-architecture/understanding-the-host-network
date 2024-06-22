@@ -39,12 +39,12 @@ events_group_14 = {'cha_txr_horz_nack': 'cha/config=0x0000000000404499', 'cha_tx
 
 # CHA events
 # IMPORTANT: occupancy events can only be measured on counter 0
-events_group_15 = {'drd_occ_agg': 'cha/config=0x0000000000403136,config2=0x40433', 'drd_inserts': 'cha/config=0x0000000000403135,config2=0x40433'}
+events_group_15 = {'drd_occ_agg': 'cha/config=0x0000000000402136,config2=0x40433', 'drd_inserts': 'cha/config=0x0000000000402135,config2=0x40433'}
 events_group_16 = {'wbeftoi_occ_agg': 'cha/config=0x0000000000403136,config2=0x48c33', 'weftoi_inserts': 'cha/config=0x0000000000403135,config2=0x48c33'}
 events_group_17 = {'wbmtoi_occ_agg': 'cha/config=0x0000000000403136,config2=0x48833', 'wbmtoi_inserts': 'cha/config=0x0000000000403135,config2=0x48833'}
 events_group_18 = {'itom_occ_agg': 'cha/config=0x0000000000403436,config2=0x49033', 'itom_inserts': 'cha/config=0x0000000000403435,config2=0x49033'}
 events_group_19 = {'blemon_occ_agg': 'cha/config=0x0000000000403436,config2=0x43033', 'blemon_inserts': 'cha/config=0x0000000000403435,config2=0x43033'}
-events_group_23 = {'rdcur_occ_agg': 'cha/config=0x0000000000403436,config2=0x43c33', 'rdcur_inserts': 'cha/config=0x0000000000403435,config2=0x43c33'}
+events_group_23 = {'rdcur_occ_agg': 'cha/config=0x0000000000402436,config2=0x43c33', 'rdcur_inserts': 'cha/config=0x0000000000402435,config2=0x43c33'}
 events_group_24 = {'pwbmtoi_occ_agg': 'cha/config=0x0000000000403436,config2=0x48833', 'pwbmtoi_inserts': 'cha/config=0x0000000000403435,config2=0x48833'}
 
 # Events for PFillWPQ
