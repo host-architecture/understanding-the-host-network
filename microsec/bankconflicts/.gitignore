@@ -1,6 +1,5 @@
 # Executable
-poll_mba
+poll_banks
 
 # Logs
-log.mba
 *.bconf
