@@ -223,6 +223,7 @@ class StatStore:
                 self.d['mlc_xput']['ALL'] = [float(cols[2])]
 
     def load_fio(self, config, io_size):
+        # TODO: Parse fio directly instead of relying on bash script
         self.d['fio_xput'] = {}
         for i in range(self.max_ssds):
             if os.path.exists(os.path.join(self.fio_stats_path, '%s.fio%d.txt'%(config, i))):
