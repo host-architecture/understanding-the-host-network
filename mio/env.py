@@ -66,6 +66,11 @@ class Environment:
         if 'MEM_CHANNELS' in config_dict:
             self.mem_channels = config_dict['MEM_CHANNELS']
 
+        if 'CHAS' in config_dict:
+            self.chas = config_dict['CHAS']
+
+        if 'IRPS' in config_dict:
+            self.irps = config_dict['IRPS']
 
 
         if os.system('modprobe msr') != 0:
@@ -159,3 +164,13 @@ class Environment:
         if not self.mem_channels:
             raise Exception('MEM_CHANNELS config not found')
         return self.mem_channels
+    
+    def get_chas(self):
+        if not self.chas:
+            raise Exception('CHAS config not found')
+        return self.chas
+
+    def get_irps(self):
+        if not self.irps:
+            raise Exception('IRPS config not found')
+        return self.irps

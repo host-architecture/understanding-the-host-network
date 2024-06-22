@@ -12,5 +12,7 @@
     "NUMA_ORDER": "3,0,1,2",
     "SSDS": ["/dev/nvme0n1", "/dev/nvme1n1", "/dev/nvme2n1", "/dev/nvme3n1", "/dev/nvme4n1", "/dev/nvme5n1"],
     "SSDScomment": ["/dev/nvme2n1", "/dev/nvme3n1"],
-    "MEM_CHANNELS": ["SKT3CHAN0", "SKT3CHAN3"] 
+    "MEM_CHANNELS": ["SKT3CHAN0", "SKT3CHAN3"],
+    "CHAS": ["SKT3C0","SKT3C1","SKT3C2","SKT3C3","SKT3C4","SKT3C5","SKT3C6","SKT3C7","SKT3C8","SKT3C9","SKT3C10","SKT3C11","SKT3C12","SKT3C13","SKT3C14","SKT3C15","SKT3C16","SKT3C17"],
+    "IPRS": ["SKT3IRP1", "SKT3IRP2"]
 }
