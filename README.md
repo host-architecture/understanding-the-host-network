@@ -28,7 +28,7 @@ Midhul Vuppalapati ([midhul@cs.cornell.edu](mailto:midhul@cs.cornell.edu))
 All the contents of this repository can be freely used for research and education purposes. Kindly cite the following publication if you use our tools or find our work helpful:
 
 ```
-@inproceedings {uhnet,
+@inproceedings {understanding-the-host-network,
 author = {Vuppalapati, Midhul and Agarwal, Saksham and Schuh, Henry N and Kasikci, Baris and Krishnamurthy, Arvind and Agarwal, Rachit},
 title = {Understanding the Host Network},
 booktitle = {ACM SIGCOMM},
