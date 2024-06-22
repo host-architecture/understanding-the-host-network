@@ -218,21 +218,73 @@ extern void tuned_STREAM_Triad(STREAM_TYPE scalar);
 extern int omp_get_num_threads();
 #endif
 
-double STREAM_Read16(uint64_t *read_checksum) {
-	int j;
-	__m128i sum = _mm_set_epi32(0, 0, 0, 0);
-	for (j=0; j<STREAM_ARRAY_SIZE; j += 2) {
-		__m128i mm_a = _mm_load_si128(&a[j]);
-		sum = _mm_add_epi32(sum, mm_a);
-	}
+// double STREAM_Read16(uint64_t *read_checksum) {
+// 	int j;
+// 	__m128i sum = _mm_set_epi32(0, 0, 0, 0);
+// 	for (j=0; j<STREAM_ARRAY_SIZE; j += 2) {
+// 		__m128i mm_a = _mm_load_si128(&a[j]);
+// 		sum = _mm_add_epi32(sum, mm_a);
+// 	}
 
-	int chx0 = _mm_extract_epi32(sum, 0);
-	int chx1 = _mm_extract_epi32(sum, 1);
-	int chx2 = _mm_extract_epi32(sum, 2);
-	int chx3 = _mm_extract_epi32(sum, 3);
-	*read_checksum += chx0 + chx1 + chx2 + chx3;
+// 	int chx0 = _mm_extract_epi32(sum, 0);
+// 	int chx1 = _mm_extract_epi32(sum, 1);
+// 	int chx2 = _mm_extract_epi32(sum, 2);
+// 	int chx3 = _mm_extract_epi32(sum, 3);
+// 	*read_checksum += chx0 + chx1 + chx2 + chx3;
+// 	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+// }
+
+// double STREAM_Read16(uint64_t *read_checksum) {
+// 	asm volatile(
+//         "mov    %[memarea], %%rax \n"
+//         "2: \n"
+//         "movdqa 0*16(%%rax), %%xmm0 \n"
+//         "movdqa 1*16(%%rax), %%xmm1 \n"
+//         "movdqa 2*16(%%rax), %%xmm2 \n"
+//         "movdqa 3*16(%%rax), %%xmm3 \n"
+//         "movdqa 4*16(%%rax), %%xmm4 \n"
+//         "movdqa 5*16(%%rax), %%xmm5 \n"
+//         "movdqa 6*16(%%rax), %%xmm6 \n"
+//         "movdqa 7*16(%%rax), %%xmm7 \n"
+//         "movdqa 8*16(%%rax), %%xmm8 \n"
+//         "movdqa 9*16(%%rax), %%xmm9 \n"
+//         "movdqa 10*16(%%rax), %%xmm10 \n"
+//         "movdqa 11*16(%%rax), %%xmm11 \n"
+//         "movdqa 12*16(%%rax), %%xmm12 \n"
+//         "movdqa 13*16(%%rax), %%xmm13 \n"
+//         "movdqa 14*16(%%rax), %%xmm14 \n"
+//         "movdqa 15*16(%%rax), %%xmm15 \n"
+//         "add    $16*16, %%rax \n"
+//         "cmp    %[end], %%rax \n"
+//         "jb     2b \n"
+// 		:
+//         : [memarea] "r" ((char *)a), [end] "r" ((char *)(a+STREAM_ARRAY_SIZE))
+//         : "rax", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15", "cc", "memory");
+// 	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+// }
+
+double STREAM_Read16(uint64_t *read_checksum) {
+	asm volatile(
+        "mov    %[memarea], %%rax \n"
+        "2: \n"
+        "movdqa 0*16(%%rax), %%xmm0 \n"
+        "movdqa 1*16(%%rax), %%xmm1 \n"
+        "movdqa 2*16(%%rax), %%xmm2 \n"
+        "movdqa 3*16(%%rax), %%xmm3 \n"
+        "movdqa 4*16(%%rax), %%xmm4 \n"
+        "movdqa 5*16(%%rax), %%xmm5 \n"
+        "movdqa 6*16(%%rax), %%xmm6 \n"
+        "movdqa 7*16(%%rax), %%xmm7 \n"
+        "add    $8*16, %%rax \n"
+        "cmp    %[end], %%rax \n"
+        "jb     2b \n"
+		:
+        : [memarea] "r" ((char *)a), [end] "r" ((char *)(a+STREAM_ARRAY_SIZE))
+        : "rax", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "cc", "memory");
 	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
 }
+
+
 
 double STREAM_Read64(uint64_t *read_checksum) {
 	int j;
@@ -685,14 +737,43 @@ double STREAM_Write64(uint64_t *read_checksum) {
 	return (STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
 }
 
-double STREAM_ReadWrite16(uint64_t *read_checksum) {
-	int j;
-	__m128i val = _mm_set_epi32(1995, 1995, 2002, 2002);
-	for (j=0; j<STREAM_ARRAY_SIZE; j += 2) {
-		__m128i mm_a = _mm_load_si128(&a[j]);
-		_mm_store_si128(&a[j], _mm_add_epi32(mm_a, val));
-	}
+// double STREAM_ReadWrite16(uint64_t *read_checksum) {
+// 	int j;
+// 	__m128i val = _mm_set_epi32(1995, 1995, 2002, 2002);
+// 	for (j=0; j<STREAM_ARRAY_SIZE; j += 2) {
+// 		__m128i mm_a = _mm_load_si128(&a[j]);
+// 		_mm_store_si128(&a[j], _mm_add_epi32(mm_a, val));
+// 	}
 
+// 	return (2*STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
+// }
+
+double STREAM_ReadWrite16(uint64_t *read_checksum) {
+	asm volatile(
+        "mov    %[memarea], %%rax \n"
+        "2: \n"
+        "movdqa 0*16(%%rax), %%xmm0 \n"
+		"movdqa %%xmm0, 0*16(%%rax) \n"
+        "movdqa 1*16(%%rax), %%xmm1 \n"
+		"movdqa %%xmm1, 1*16(%%rax) \n"
+        "movdqa 2*16(%%rax), %%xmm2 \n"
+		"movdqa %%xmm2, 2*16(%%rax) \n"
+        "movdqa 3*16(%%rax), %%xmm3 \n"
+		"movdqa %%xmm3, 3*16(%%rax) \n"
+        "movdqa 4*16(%%rax), %%xmm4 \n"
+		"movdqa %%xmm4, 4*16(%%rax) \n"
+        "movdqa 5*16(%%rax), %%xmm5 \n"
+		"movdqa %%xmm5, 5*16(%%rax) \n"
+        "movdqa 6*16(%%rax), %%xmm6 \n"
+		"movdqa %%xmm6, 6*16(%%rax) \n"
+        "movdqa 7*16(%%rax), %%xmm7 \n"
+		"movdqa %%xmm7, 7*16(%%rax) \n"
+        "add    $8*16, %%rax \n"
+        "cmp    %[end], %%rax \n"
+        "jb     2b \n"
+		:
+        : [memarea] "r" ((char *)a), [end] "r" ((char *)(a+STREAM_ARRAY_SIZE))
+        : "rax", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "cc", "memory");
 	return (2*STREAM_ARRAY_SIZE*sizeof(STREAM_TYPE));
 }
 
