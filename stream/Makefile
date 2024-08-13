@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -O3 -msse4 -g -march=native -funroll-loops
+CFLAGS = -O3 -msse4 -mavx512f -g -march=native -funroll-loops
 
 FC = gfortran
 FFLAGS = -O2 -fopenmp
