@@ -2,7 +2,7 @@ import sys, os
 
 from mio.stats import *
 
-STATS_PATH = '/home/midhul/membw-eval'
+STATS_PATH = '/home/sosp24ae/colloid-eval'
 
 config = sys.argv[1]
 

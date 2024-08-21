@@ -1,7 +1,7 @@
 import os, sys, re, subprocess, glob
 
 MAX_SSDS = 8
-FIO_STATS_PATH = '/home/midhul/membw-eval'
+FIO_STATS_PATH = '/home/sosp24ae/colloid-eval'
 
 CHA_FREQ = 2.4*1e9
 IMC_FREQ_PRAC = 1463000000.0
