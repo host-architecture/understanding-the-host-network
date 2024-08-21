@@ -321,6 +321,12 @@ def run_benchmark(args, env):
         mbm = MBMRunner("") # assuming pqos in PATH
         mbm.run(os.path.join(env.get_stats_path(), '%s.mbm.txt'%(prefix)), env.get_cores_in_numa(env.get_numa_order()[0]), RECORD_DURATION+2)
         print('stats record end')
+    elif args.stats_colloid_mbm:
+        time.sleep(args.stats_colloid_wait)
+        print('stats record start')
+        mbm = MBMRunner("") # assuming pqos in PATH
+        mbm.run(os.path.join(env.get_stats_path(), '%s.mbm.txt'%(prefix)), env.get_cores_in_numa(env.get_numa_order()[0]), RECORD_DURATION+2)
+        print('stats record end')
 
 
 
@@ -428,6 +434,7 @@ def main(argv=[]):
     parser.add_argument('--stats_colloid', help='Record stats for colloid', action='store_true')
     parser.add_argument('--stats_colloid_wait', help='Duration to wait before recording colloid stats (in secs)', type=int, default=30)
     parser.add_argument('--stats_colloid_cha', help='Record cha stats for colloid', action='store_true')
+    parser.add_argument('--stats_colloid_mbm', help='Record mbm stats for colloid', action='store_true')
     parser.add_argument('--ant_vary_load', help='file containing one integer per-line specifying how many ant cores should be active per-second')
 
 
