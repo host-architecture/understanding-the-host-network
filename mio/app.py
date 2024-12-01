@@ -22,7 +22,7 @@ ANT_COOLDOWN_DURATION = 10
 # Cascadelake
 events_group_0 = {'lfb_occ_agg': 'core/config=0x0000000000430148', 'lfb_cycles': 'core/config=0x0000000001430148', 'lfb_l1_misses': 'core/config=0x00000000004308d1', 'lfb_full': 'core/config=0x0000000000430248'}
 events_group_1 = {'load_l1_hits': 'core/config=0x00000000004301d1', 'load_l1_misses': 'core/config=0x00000000004308d1', 'load_l1_fbhit': 'core/config=0x00000000004340d1', 'loads': 'core/config=0x00000000004381d0'}
-events_group_2 = {'load_l2_hits': 'core/config=0x00000000004302d1', 'load_l2_misses': 'core/config=0x00000000004310d1', 'load_l3_hits': 'core/config=0x00000000004304d1', 'load_l3_misses': 'core/config=0x00000000004320d1'}
+events_group_2 = {'load_l2_hits': 'core/config=0x000000000043c124', 'load_l2_misses': 'core/config=0x0000000000432124', 'load_l3_hits': 'core/config=0x00000000004304d1', 'load_l3_misses': 'core/config=0x00000000004320d1'}
 events_group_3 = {'rpq_occ_agg': 'imc/config=0x0000000000400080', 'wpq_full_cycles': 'imc/config=0x0000000000400022', 'acts_byp': 'imc/config=0x000000000040801', 'acts_read': 'imc/config=0x000000000040101'}
 events_group_4 = {'wmm_to_rmm_starve': 'imc/config=0x0000000000402c0', 'wmm': 'imc/config=0x0000000000400207', 'wmm_to_rmm': 'imc/config=0x0000000000407c0', 'acts_write': 'imc/config=0x000000000040201'}
 events_group_5 = {'wr_wmm': 'imc/config=0x0000000000400404', 'wr_rmm': 'imc/config=0x0000000000400804', 'rd_wmm': 'imc/config=0x000000000041004', 'rd_rmm': 'imc/config=0x000000000042004'}
@@ -49,6 +49,7 @@ events_group_24 = {'pwbmtoi_occ_agg': 'cha/config=0x0000000000403436,config2=0x4
 
 # Events for PFillWPQ
 events_group_20 = {'wpq_occ_gte34': 'imc/config=0x22400081', 'wpq_occ_gte30': 'imc/config=0x1e400081', 'wpq_occ_gte32': 'imc/config=0x20400081', 'wpq_occ_gte36': 'imc/config=0x24400081'}
+events_group_201 = {'wpq_occ_agg': 'imc/config=0x0000000000400081'}
 
 # Events for PFillRPQ
 events_group_21 = {'rpq_occ_gte32': 'imc/config=0x20400080', 'rpq_occ_gte34': 'imc/config=0x22400080', 'rpq_occ_gte36': 'imc/config=0x24400080', 'rpq_occ_gte38': 'imc/config=0x26400080'}
@@ -237,16 +238,17 @@ def run_benchmark(args, env):
         # pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-lfb.txt'%(prefix, num_cores)), events_group_0, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha.txt'%(prefix, num_cores)), events_group_7, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha2.txt'%(prefix, num_cores)), events_group_15, RECORD_DURATION)
-        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha3.txt'%(prefix, num_cores)), events_group_16, RECORD_DURATION)
+        #pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha3.txt'%(prefix, num_cores)), events_group_16, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha4.txt'%(prefix, num_cores)), events_group_17, RECORD_DURATION)
-        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha5.txt'%(prefix, num_cores)), events_group_18, RECORD_DURATION)
+        #pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha5.txt'%(prefix, num_cores)), events_group_18, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha6.txt'%(prefix, num_cores)), events_group_19, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha7.txt'%(prefix, num_cores)), events_group_23, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-cha8.txt'%(prefix, num_cores)), events_group_24, RECORD_DURATION)
-        #pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l1.txt'%(prefix, num_cores)), events_group_1, RECORD_DURATION)
-        #pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l2l3.txt'%(prefix, num_cores)), events_group_2, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l1.txt'%(prefix, num_cores)), events_group_1, RECORD_DURATION)
+        pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-l2l3.txt'%(prefix, num_cores)), events_group_2, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-imc.txt'%(prefix, num_cores)), events_group_3, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-wpq.txt'%(prefix, num_cores)), events_group_20, RECORD_DURATION)
+        #pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-wpq2.txt'%(prefix, num_cores)), events_group_201, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-rpq.txt'%(prefix, num_cores)), events_group_21, RECORD_DURATION)
         pcm_raw.run(os.path.join(env.get_stats_path(), '%s-cores%d.pcm-rpq2.txt'%(prefix, num_cores)), events_group_22, RECORD_DURATION)
         # Following only for CascadeLake. (comment out for IceLake)

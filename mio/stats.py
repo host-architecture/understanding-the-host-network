@@ -20,6 +20,7 @@ class StatStore:
             'l2_missrate': (lambda x, y: (x)/(x+y), ['load_l2_misses', 'load_l2_hits']),
             'l3_missrate': (lambda x, y: (x)/(x+y), ['load_l3_misses', 'load_l3_hits']),
             'rpq_occupancy': (lambda x: x/1466500000.0, ['rpq_occ_agg']),
+            'wpq_occupancy': (lambda x: x/1466500000.0, ['wpq_occ_agg']),
             'switching_delay': (lambda z, x, y: x*(y/(z*1e6/64))*8.18, ['memreadbw', 'rpq_occupancy', 'wmm_to_rmm']),
             'write_hol': (lambda z, x, y: x*(y/z)*2.73, ['memreadbw', 'rpq_occupancy', 'memwritebw']),
             'act_penalty': (lambda z, x, y: ((x+y)/(z*1e6/64))*15, ['memreadbw', 'acts_read', 'acts_byp']),
